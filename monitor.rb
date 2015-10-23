@@ -86,5 +86,5 @@ while true
   puts "Getting users"
   get_users
   puts @last_user_date
-  sleep(ENV["SLEEP_TIMEOUT"])
+  sleep(ENV["SLEEP_TIMEOUT"].to_i)
 end
