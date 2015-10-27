@@ -4,6 +4,8 @@ require 'oauth2'
 require 'json'
 require 'slack-notifier'
 
+$stdout.sync = true
+
 
 client = OAuth2::Client.new(
   ENV["CLIENT_ID"],
@@ -12,7 +14,7 @@ client = OAuth2::Client.new(
 
 @notifier = Slack::Notifier.new ENV["SLACK_HOOK"],
               channel: "#cloud-gov",
-              username: "sanboxbot"
+              username: "sandboxbot"
 @token = client.client_credentials.get_token
 @domains = JSON.parse(ENV["DOMAINS"])
 @last_user_date = nil
@@ -42,9 +44,9 @@ def get_users
 
     next if u["entity"]["username"].nil? || u["entity"]["username"].index("@").nil?
     email = u["entity"]["username"].split("@")
-    domain = @domains.detect { |d| d["domain"] == email[1]}
+    domain = @domains.detect { |d| d["domain"] == email[1].downcase}
     if domain
-      unless domain["spaces"].map { |s| s["entity"]["name"] }.include?(email[0])
+      unless domain["spaces"].map { |s| s["entity"]["name"] }.include?(email[0].downcase)
         # Print status
         msg = "Setting up new sandbox user #{u["entity"]["username"]} in #{domain["space"]}"
         puts msg
@@ -62,7 +64,7 @@ def get_users
 
         # Create space
         req = {
-          name: email[0],
+          name: email[0].downcase,
           organization_guid: domain["guid"],
           developer_guids: [u["metadata"]["guid"]],
           manager_guids: [u["metadata"]["guid"]]
