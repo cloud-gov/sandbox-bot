@@ -21,10 +21,19 @@ client = OAuth2::Client.new(
 
 def load_spaces
   @domains.each do |d|
-    response = @token.get(
-      "https://api.cloud.gov/v2/organizations/" + d["guid"] + "/spaces",
-      :params => { 'results-per-page' => '100' })
-    d["spaces"] = response.parsed["resources"]
+    current_page = 1
+    total_pages = 1
+    d["spaces"] = []
+    while total_pages >= current_page
+      response = @token.get(
+        "https://api.cloud.gov/v2/organizations/" + d["guid"] + "/spaces",
+        :params => { 'results-per-page' => '100', 'page' => current_page })
+
+      total_pages = response.parsed["total_pages"].to_i
+      current_page += 1
+      d["spaces"] << response.parsed["resources"]
+    end
+    d["spaces"].flatten!(1)
   end
 end
 
@@ -46,7 +55,7 @@ def get_users
     email = u["entity"]["username"].split("@")
     domain = @domains.detect { |d| d["domain"] == email[1].downcase}
     if domain
-      unless domain["spaces"].map { |s| s["entity"]["name"] }.include?(email[0].downcase)
+      unless domain["spaces"].map { |s| s["entity"]["name"].downcase }.include?(email[0].downcase)
         # Print status
         msg = "Setting up new sandbox user #{u["entity"]["username"]} in #{domain["space"]}"
         puts msg

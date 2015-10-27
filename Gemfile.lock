@@ -22,6 +22,3 @@ PLATFORMS
 DEPENDENCIES
   oauth2
   slack-notifier
-
-BUNDLED WITH
-   1.10.3
