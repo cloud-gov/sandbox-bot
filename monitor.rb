@@ -93,7 +93,7 @@ end
 def create_space_quota(domain)
   req = {
     name: "sandbox_quota",
-    non_basic_services_allowed: true,
+    non_basic_services_allowed: false,
     total_services: 10,
     total_routes: 10,
     memory_limit: 1024,
