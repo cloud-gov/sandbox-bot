@@ -151,7 +151,7 @@ def get_users
 
     next if u["entity"]["username"].nil? || u["entity"]["username"].index("@").nil?
     email = u["entity"]["username"].split("@")
-    domain = @domains.detect { |d| d["domain"] == email[1].downcase}
+    domain = @domains.detect { |d| email[1].downcase.include? d["domain"] }
     if domain
       unless domain["spaces"].map { |s| s["entity"]["name"].downcase }.include?(email[0].downcase)
         # Print status
