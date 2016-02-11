@@ -54,7 +54,7 @@ def create_org_quota(domain)
   }
 
   # do create
-  create_response = @token.post("/v2/quota_definitions",
+  create_response = @token.post("https://api.cloud.gov/v2/quota_definitions",
     body: req.to_json)
 
   # assign quota to org
@@ -62,7 +62,7 @@ def create_org_quota(domain)
     name: domain["space"],
     quota_definition_guid: create_response.parsed["metadata"]["guid"]
   }
-  assign_response = @token.put("/v2/organizations/" + domain["guid"],
+  assign_response = @token.put("https://api.cloud.gov/v2/organizations/" + domain["guid"],
     body: req.to_json)
 end
 
@@ -85,7 +85,7 @@ def increase_org_quota(domain)
     instance_memory_limit: -1
   }
   # Update quota definition
-  response = @token.put("/v2/quota_definitions/" + quota["metadata"]["guid"],
+  response = @token.put("https://api.cloud.gov/v2/quota_definitions/" + quota["metadata"]["guid"],
     body: req.to_json)
 
 end
@@ -93,16 +93,16 @@ end
 def create_space_quota(domain)
   req = {
     name: "sandbox_quota",
-    non_basic_services_allowed: true,
+    non_basic_services_allowed: false,
     total_services: 10,
     total_routes: 10,
     memory_limit: 1024,
     organization_guid: domain["guid"]
   }
-
   # Create sandbox_quota for a particular org
-  response = @token.post("/v2/space_quota_definitions",
+  response = @token.post("https://api.cloud.gov/v2/space_quota_definitions",
     body: req.to_json)
+
   return response.parsed["metadata"]["guid"]
 
 end
@@ -110,7 +110,7 @@ end
 def set_space_quotas(domain, space_quota_guid)
   domain["spaces"].each do |space|
     # Assign space to space quota
-    response = @token.put("/v2/space_quota_definitions/" +
+    response = @token.put("https://api.cloud.gov/v2/space_quota_definitions/" +
       space_quota_guid + "/spaces/" +
       space["metadata"]["guid"])
   end
@@ -151,7 +151,7 @@ def get_users
 
     next if u["entity"]["username"].nil? || u["entity"]["username"].index("@").nil?
     email = u["entity"]["username"].split("@")
-    domain = @domains.detect { |d| d["domain"] == email[1].downcase}
+    domain = @domains.detect { |d| email[1].downcase.include? d["domain"] }
     if domain
       unless domain["spaces"].map { |s| s["entity"]["name"].downcase }.include?(email[0].downcase)
         # Print status
