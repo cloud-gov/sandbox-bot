@@ -202,24 +202,27 @@ load_org_quotas
 if ARGV.count && ARGV[0] == "init"
   touched_orgs = []
   @domains.each do |domain|
-    org_name = domain["space"]
-    quota_url = nil
-    # Only process sandbox orgs, and only if we haven't done it already
-    if /^sandbox/ =~ org_name && ! touched_orgs.include?(org_name)
-      quota = get_org_quota(org_name)
-      if quota
-        increase_org_quota(domain)
-      else
-        create_org_quota(domain)
-      end
-      touched_orgs << org_name
-      if ! domain["space_quota_guid"]
-        # create a space quota
-        space_quota_guid = create_space_quota(domain)
-        # output space quota guid so we can update the DOMAINS env in app
-        puts "Update DOMAINS env: \"domain\":\"#{domain["domain"]}\" with \"space_quota_guid\":\"#{space_quota_guid}\""
-        # assign quota to existing spaces
-        set_space_quotas(domain, space_quota_guid)
+    # skip if we already setup space quota
+    if !domain["space_quota_guid"]
+      org_name = domain["space"]
+      quota_url = nil
+      # Only process sandbox orgs, and only if we haven't done it already
+      if /^sandbox/ =~ org_name && ! touched_orgs.include?(org_name)
+        quota = get_org_quota(org_name)
+        if quota
+          increase_org_quota(domain)
+        else
+          create_org_quota(domain)
+        end
+        touched_orgs << org_name
+        if ! domain["space_quota_guid"]
+          # create a space quota
+          space_quota_guid = create_space_quota(domain)
+          # output space quota guid so we can update the DOMAINS env in app
+          puts "Update DOMAINS env: \"domain\":\"#{domain["domain"]}\" with \"space_quota_guid\":\"#{space_quota_guid}\""
+          # assign quota to existing spaces
+          set_space_quotas(domain, space_quota_guid)
+        end
       end
     end
   end
