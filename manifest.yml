@@ -5,3 +5,5 @@ applications:
   command: bundle exec ./monitor.rb
   env:
     SLEEP_TIMEOUT: 5
+    DO_SLACK: true
+  no-route: true
