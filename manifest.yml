@@ -1,0 +1,6 @@
+---
+memory: 128M
+applications:
+- name: sandbox-bot
+  env:
+    SLEEP_TIMEOUT: 5
