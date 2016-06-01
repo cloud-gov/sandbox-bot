@@ -1,0 +1,4 @@
+---
+memory: 128M
+applications:
+- name: sandbox-bot

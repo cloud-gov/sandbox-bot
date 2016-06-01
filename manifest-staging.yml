@@ -1,0 +1,3 @@
+---
+inherit: manifest.yml
+name: sandbox-bot-staging
