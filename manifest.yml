@@ -2,5 +2,6 @@
 memory: 128M
 applications:
 - name: sandbox-bot
+  command: bundle exec ./monitor.rb
   env:
     SLEEP_TIMEOUT: 5
