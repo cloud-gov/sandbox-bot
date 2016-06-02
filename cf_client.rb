@@ -49,7 +49,7 @@ class CFClient
 
   end
 
-  def get_users 
+  def get_users
 
     response = @token.get("#{api_url}/users?order-direction=desc")
     users = response.parsed["resources"];
@@ -57,14 +57,14 @@ class CFClient
   end
 
   def add_user_to_org(org_guid, user_guid)
-    
+
     # Add user to org
     @token.put("#{api_url}/organizations/#{org_guid}/users/#{user_guid}")
 
   end
 
 
-  def create_org(org_name, quota_definition_guid)
+  def create_organization(org_name, quota_definition_guid)
 
     req = {
       name: org_name,
@@ -76,8 +76,8 @@ class CFClient
 
   end
 
-  def create_space(name, organization_guid, developer_guids, manager_guids, space_quota_guid) 
-    
+  def create_space(name, organization_guid, developer_guids, manager_guids, space_quota_guid)
+
     req = {
       name: name,
       organization_guid: organization_guid,
@@ -101,7 +101,7 @@ class CFClient
   def increase_org_quota(org)
 
     puts "Setting new org quota limits for #{org['entity']['name']}"
-    
+
     quota = get_organization_quota(org['metadata']['guid'])
     update_url = quota["metadata"]["url"]
     quota_total_routes = quota["entity"]["total_routes"]
