@@ -69,7 +69,7 @@ class CFClient
 
   end
 
-  def add_user_to_org(org_guid, user_guid)
+  def add_user_to_org(user_guid, org_guid)
 
     # Add user to org
     @token.put("#{api_url}/organizations/#{org_guid}/users/#{user_guid}")
@@ -115,16 +115,17 @@ class CFClient
 
     puts "Setting new org quota limits for #{org['entity']['name']}"
 
-    quota = get_organization_quota(org['metadata']['guid'])
+    quota = get_organization_quota(org['entity']['quota_definition_guid'])
     update_url = quota["metadata"]["url"]
     quota_total_routes = quota["entity"]["total_routes"]
     quota_total_services = quota["entity"]["total_services"]
     quota_memory_limit = quota["entity"]["memory_limit"]
-    space_count = domain["spaces_count"]
+    org_spaces = get_organization_spaces(org['metadata']['guid'])
+    space_count = org_spaces.length
     computed_total_routes_services = 10 * space_count
     computed_memory_limit = 1024 * space_count
     req = {
-      name: domain["space"],
+      name: org['entity']['name'],
       non_basic_services_allowed: true,
       total_services: quota_total_services > computed_total_routes_services ? quota_total_services : computed_total_routes_services,
       total_routes: quota_total_routes > computed_total_routes_services ? quota_total_routes : computed_total_routes_services,
