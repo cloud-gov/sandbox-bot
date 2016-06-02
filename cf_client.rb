@@ -42,6 +42,19 @@ class CFClient
 
   end
 
+  def get_organization_quota_by_name(org_name)
+
+    quota = nil
+
+    response = @token.get("#{api_url}/quota_definitions?q=name:#{org_name}")
+    if response.parsed["total_results"] == 1
+      quota = response.parsed['resources'][0]
+    end
+
+    return quota
+
+  end
+
   def get_organization_spaces(org_guid)
 
     response = @token.get("#{api_url}/organizations/#{(org_guid)}/spaces")

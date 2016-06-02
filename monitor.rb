@@ -41,7 +41,11 @@ def process_new_users
     sandbox_org_spaces = []
 
     if !sandbox_org
-      org_quota = @cf_client.create_organization_quota(sandbox_org_name)
+      #check if org quota already exists - if not, create
+      org_quota = @cf_client.get_organization_quota_by_name(sandbox_org_name)
+      if !org_quota
+        org_quota = @cf_client.create_organization_quota(sandbox_org_name)
+      end
     	sandbox_org = @cf_client.create_organization(sandbox_org_name, org_quota["metadata"]["guid"])
       msg = "Creating New Organization #{sandbox_org_name}"
       puts msg
