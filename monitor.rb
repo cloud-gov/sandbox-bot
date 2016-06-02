@@ -27,13 +27,13 @@ def process_new_users
       last_user_date = user["metadata"]["created_at"]
     end
 
-    #break out of processing if we already processed this user in previous run 
+    #break out of processing if we already processed this user in previous run
     break if @last_user_date && @last_user_date > user["metadata"]["created_at"]
 
-  	email = user["entity"]["username"] 
+  	email = user["entity"]["username"]
     next if !is_valid_email(email) || !is_whitelisted_email(email)
 
-    # extract the domain name from the email address 
+    # extract the domain name from the email address
     email_domain_name = get_email_domain_name(email)
     sandbox_org_name = "sandbox-#{email_domain_name}"
 
@@ -63,14 +63,14 @@ def process_new_users
       if ENV["DO_SLACK"]
         @notifier.ping msg, icon_emoji: ":cloud:"
       end
-     
+
       # add user to the parent org
-      @cf_client.add_user_to_org(user["metadata"]["guid"], sandbox_org['metadata']["guid"])      
+      @cf_client.add_user_to_org(user["metadata"]["guid"], sandbox_org['metadata']["guid"])
       # create user space using the first portion of the email address as the space name
-      @cf_client.create_space(user_space_name, sandbox_org["guid"], 
-          [user["metadata"]["guid"]], [user["metadata"]["guid"]], sandbox_org[['metadata']["space_quota_guid"])
-      # increase the org quota 
-      if !is_new_org      
+      @cf_client.create_space(user_space_name, sandbox_org["guid"],
+          [user["metadata"]["guid"]], [user["metadata"]["guid"]], sandbox_org[['metadata']["space_quota_guid"]])
+      # increase the org quota
+      if !is_new_org
         @cf_client.increase_org_quota(sandbox_org)
         puts "Increasing org quota for #{sandbox_org_name}"
       end
