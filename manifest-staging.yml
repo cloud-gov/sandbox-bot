@@ -1,3 +1,6 @@
 ---
 inherit: manifest.yml
 name: sandbox-bot-staging
+env:
+  SLEEP_TIMEOUT: 10
+  DO_SLACK: false
