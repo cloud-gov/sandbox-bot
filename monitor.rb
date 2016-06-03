@@ -72,7 +72,7 @@ def process_new_users
       @cf_client.add_user_to_org(user["metadata"]["guid"], sandbox_org['metadata']["guid"])
       # create user space using the first portion of the email address as the space name
       @cf_client.create_space(user_space_name, sandbox_org['metadata']["guid"],
-          [user["metadata"]["guid"]], [user["metadata"]["guid"]], sandbox_org['metadata']["space_quota_guid"])
+          [user["metadata"]["guid"]], [user["metadata"]["guid"]], sandbox_org['entity']['quota_definition_guid'])
       # increase the org quota
       if !is_new_org
         @cf_client.increase_org_quota(sandbox_org)
