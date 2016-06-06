@@ -113,8 +113,6 @@ class CFClient
 
   def increase_org_quota(org)
 
-    puts "Setting new org quota limits for #{org['entity']['name']}"
-
     quota = get_organization_quota(org['entity']['quota_definition_guid'])
     update_url = quota["metadata"]["url"]
     quota_total_routes = quota["entity"]["total_routes"]
@@ -140,8 +138,6 @@ class CFClient
 
   def create_organization_quota(org_name)
 
-    puts "Creating org quota for #{org_name}"
-
     req = {
       name: org_name,
       non_basic_services_allowed: false,
@@ -156,4 +152,69 @@ class CFClient
 
   end
 
+
+  def create_organization_space_quota_definition(org_guid, space_name)
+
+    req = {
+      organization_guid: org_guid,
+      name: space_name,
+      non_basic_services_allowed: false,
+      total_services: 10,
+      total_routes: 10,
+      memory_limit: 1024,
+      instance_memory_limit: -1
+    }
+
+    response = @token.post("#{api_url}/quota_definitions", body: req.to_json)
+    org_quota = response.parsed
+
+  end
+
+
+  def get_quota_definitions
+
+    response = @token.get("#{api_url}/quota_definitions")
+    quota = response.parsed
+
+  end
+
+  def get_space_quota_definitions
+
+    response = @token.get("#{api_url}/space_quota_definitions")
+    quota = response.parsed
+
+  end
+
+  def get_organization_space_quota_definitions(org_guid)
+
+    space_quota_definitions = nil
+
+    response = @token.get("#{api_url}/organizations/#{org_guid}/space_quota_definitions")
+
+    if response.parsed["total_results"] != 0
+      space_quota_definitions = response.parsed['resources']
+    end
+
+    return space_quota_definitions
+
+  end
+
+  def get_organization_space_quota_definition_by_name(org_guid, name)
+
+    space_quota_definition = nil
+
+    space_quota_definitions = get_organization_space_quota_definitions(org_guid)
+
+    if space_quota_definitions
+      space_quota_definitions.each do |quota_definition|
+        if quota_definition['entity']['name'] == name
+          space_quota_definition = quota_definition
+          break
+        end
+      end
+    end
+
+    space_quota_definition
+
+  end
 end
