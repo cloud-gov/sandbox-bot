@@ -165,7 +165,7 @@ class CFClient
       instance_memory_limit: -1
     }
 
-    response = @token.post("#{api_url}/quota_definitions", body: req.to_json)
+    response = @token.post("#{api_url}/space_quota_definitions", body: req.to_json)
     org_quota = response.parsed
 
   end
