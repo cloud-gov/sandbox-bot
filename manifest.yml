@@ -3,7 +3,7 @@ memory: 128M
 applications:
 - name: sandbox-bot
   command: bundle && ruby ./monitor.rb
-  env:
-    SLEEP_TIMEOUT: 5
-    DO_SLACK: true
   no-route: true
+env:
+  SLEEP_TIMEOUT: 30
+  DO_SLACK: true
