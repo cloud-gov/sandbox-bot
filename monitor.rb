@@ -54,7 +54,11 @@ def process_new_users
       msg = "Creating New Organization #{sandbox_org_name}"
       puts msg
       if ENV["DO_SLACK"]
-        @notifier.ping msg, icon_emoji: ":cloud:"
+        begin
+          @notifier.ping msg, icon_emoji: ":cloud:"
+        rescue
+          puts "Could not post #{msg} to slack"
+        end
       end
       is_new_org = true
     else
@@ -70,7 +74,11 @@ def process_new_users
 
       # Send alert to slack
       if ENV["DO_SLACK"]
-        @notifier.ping msg, icon_emoji: ":cloud:"
+        begin
+          @notifier.ping msg, icon_emoji: ":cloud:"
+        rescue
+          puts "Could not post #{msg} to slack"
+        end
       end
 
       # add user to the parent org
