@@ -4,7 +4,7 @@ require 'oauth2'
 
 class CFClient
 
-  @@domain_name = 'cloud.gov'
+  @@domain_name = ENV["DOMAIN_NAME"]
 
 	def initialize(client_id, client_secret, uaa_url)
     @client = OAuth2::Client.new(
