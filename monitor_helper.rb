@@ -24,7 +24,7 @@ module MonitorHelper
 
 	def get_sandbox_space_name(email)
 
-   		return email.split('@')[0]
+   		return email.split('@')[0].downcase
 
 	end
 
@@ -34,7 +34,7 @@ module MonitorHelper
 	def user_space_exists(user_space_name, org_spaces)
 
 		org_spaces.each do |org_space|
-			if org_space["entity"]["name"] == user_space_name
+			if org_space["entity"]["name"].downcase == user_space_name
 				return true
 			end
 		end
