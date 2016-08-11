@@ -24,7 +24,7 @@ module MonitorHelper
 
 	def get_sandbox_space_name(email)
 
-   		return email.split('@')[0]
+   		return email.split('@')[0].downcase
 
 	end
 
