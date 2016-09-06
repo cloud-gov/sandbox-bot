@@ -4,6 +4,8 @@ applications:
 - name: sandbox-bot
   command: bundle && ruby ./monitor.rb
   no-route: true
+  health-check-type: none
+  buildpack: https://github.com/cloudfoundry/ruby-buildpack.git
 env:
   SLEEP_TIMEOUT: 30
   DO_SLACK: true

@@ -31,6 +31,7 @@ describe MonitorHelper do
 	it "should extract a valid sandbox space name from email" do
 
 		expect(monitor_helper_test.get_sandbox_space_name('john.doe@some.domain.gov')).to eq 'john.doe'
+		expect(monitor_helper_test.get_sandbox_space_name('John.Doe@some.domain.gov')).to eq 'john.doe'
 
 	end
 
