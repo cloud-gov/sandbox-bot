@@ -40,7 +40,6 @@ def process_new_users
     sandbox_org_name = "sandbox-#{email_domain_name}"
 
     sandbox_org = @cf_client.get_organization_by_name(sandbox_org_name)
-    sandbox_org_spaces = []
 
     if !sandbox_org
       #check if org quota already exists - if not, create
@@ -61,14 +60,12 @@ def process_new_users
         end
       end
       is_new_org = true
-    else
-      sandbox_org_guid = sandbox_org['metadata']['guid']
-      sandbox_org_spaces = @cf_client.get_organization_spaces(sandbox_org_guid)
     end
 
     user_space_name = get_sandbox_space_name(email)
     # if this is a new org or the user space doesn't exist in the org - create one
-    if is_new_org || !user_space_exists(user_space_name, sandbox_org_spaces)
+    if is_new_org ||
+      !@cf_client.organization_space_name_exists?(sandbox_org['metadata']['guid'], user_space_name)
       msg = "Setting up new sandbox user #{user["entity"]["username"]} in #{sandbox_org_name}"
       puts msg
 

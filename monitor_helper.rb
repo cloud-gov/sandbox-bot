@@ -28,20 +28,4 @@ module MonitorHelper
 
 	end
 
-	# Checks to see if a user sandbox space already exists
-	# in the parent org epaces
-
-	def user_space_exists(user_space_name, org_spaces)
-
-		org_spaces.each do |org_space|
-			if org_space["entity"]["name"].downcase == user_space_name
-				return true
-			end
-		end
-
-		return false
-
-	end
-
-
 end

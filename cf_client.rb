@@ -217,4 +217,12 @@ class CFClient
     space_quota_definition
 
   end
+
+  def organization_space_name_exists?(org_guid, space_name)
+
+    response = @token.get("#{api_url}/organizations/#{(org_guid)}/spaces?q=name:#{space_name}")
+    return response.parsed["total_results"] == 1
+
+  end
+
 end
