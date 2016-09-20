@@ -1,4 +1,5 @@
 # cg-sandbox-bot
+[![Code Climate](https://codeclimate.com/github/18F/cg-sandbox-bot/badges/gpa.svg)](https://codeclimate.com/github/18F/cg-sandbox-bot)
 
 Monitor CF cloud controller users and create a sandbox space for known domains.
 
