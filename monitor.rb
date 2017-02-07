@@ -6,6 +6,7 @@ include MonitorHelper
 
 $stdout.sync = true
 
+SANDBOX_ORG_NAME = 'sandbox'
 SANDBOX_QUOTA_NAME = 'sandbox_quota'
 
 @notifier = Slack::Notifier.new ENV["SLACK_HOOK"],
@@ -13,44 +14,28 @@ SANDBOX_QUOTA_NAME = 'sandbox_quota'
               username: "sandboxbot"
 
 @cf_client = CFClient.new(ENV["CLIENT_ID"], ENV["CLIENT_SECRET"], ENV["UAA_URL"])
-@last_user_date = nil
 
 def process_new_users
-
-  last_user_date = nil
-	users = @cf_client.get_users
+  users = @cf_client.get_users
 
   users.each do |user|
-
     is_new_org = false
 
-    # save the date of the most recent user added
-    if last_user_date.nil? || last_user_date < user["metadata"]["created_at"]
-      last_user_date = user["metadata"]["created_at"]
-    end
-
-    #break out of processing if we already processed this user in previous run
-    break if @last_user_date && @last_user_date >= user["metadata"]["created_at"]
-
-  	email = user["entity"]["username"]
+    email = user["entity"]["username"]
     next if !is_valid_email(email) || !is_whitelisted_email(email)
 
-    # extract the domain name from the email address
-    email_domain_name = get_email_domain_name(email)
-    sandbox_org_name = "sandbox-#{email_domain_name}"
-
-    sandbox_org = @cf_client.get_organization_by_name(sandbox_org_name)
+    sandbox_org = @cf_client.get_organization_by_name(SANDBOX_ORG_NAME)
 
     if !sandbox_org
       #check if org quota already exists - if not, create
-      org_quota = @cf_client.get_organization_quota_by_name(sandbox_org_name)
+      org_quota = @cf_client.get_organization_quota_by_name(SANDBOX_ORG_NAME)
       if !org_quota
-        puts "Creating org quota for #{sandbox_org_name}"
-        org_quota = @cf_client.create_organization_quota(sandbox_org_name)
+        puts "Creating org quota for #{SANDBOX_ORG_NAME}"
+        org_quota = @cf_client.create_organization_quota(SANDBOX_ORG_NAME)
       end
-    	sandbox_org = @cf_client.create_organization(sandbox_org_name, org_quota["metadata"]["guid"])
+      sandbox_org = @cf_client.create_organization(SANDBOX_ORG_NAME, org_quota["metadata"]["guid"])
 
-      msg = "Creating New Organization #{sandbox_org_name}"
+      msg = "Creating New Organization #{SANDBOX_ORG_NAME}"
       puts msg
       if ENV["DO_SLACK"]
         begin
@@ -66,7 +51,7 @@ def process_new_users
     # if this is a new org or the user space doesn't exist in the org - create one
     if is_new_org ||
       !@cf_client.organization_space_name_exists?(sandbox_org['metadata']['guid'], user_space_name)
-      msg = "Setting up new sandbox user #{user["entity"]["username"]} in #{sandbox_org_name}"
+      msg = "Setting up new sandbox user #{user["entity"]["username"]} in #{SANDBOX_ORG_NAME}"
       puts msg
 
       # Send alert to slack
@@ -96,24 +81,17 @@ def process_new_users
           sandbox_org_space_quota_definition['metadata']['guid'])
       # increase the org quota
       if !is_new_org
-        puts "Increasing org quota for #{sandbox_org_name}"
+        puts "Increasing org quota for #{SANDBOX_ORG_NAME}"
         @cf_client.increase_org_quota(sandbox_org)
       end
     else
       puts "Space #{user_space_name} already exists - skipping"
     end
   end
-
-  # save the date of the most recent user processed so that we can
-  # ignore users added before that date on the next iteration
-
-  @last_user_date = last_user_date
-
 end
 
 while true
   puts "Getting users"
   process_new_users
-  puts @last_user_date
   sleep(ENV["SLEEP_TIMEOUT"].to_i)
 end
