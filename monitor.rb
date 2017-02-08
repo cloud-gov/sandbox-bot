@@ -14,6 +14,7 @@ SANDBOX_QUOTA_NAME = 'sandbox_quota'
               username: "sandboxbot"
 
 @cf_client = CFClient.new(ENV["CLIENT_ID"], ENV["CLIENT_SECRET"], ENV["UAA_URL"])
+@environment = get_cloud_environment(ENV["UAA_URL"])
 
 def process_new_users
   users = @cf_client.get_users
@@ -35,7 +36,7 @@ def process_new_users
       end
       sandbox_org = @cf_client.create_organization(SANDBOX_ORG_NAME, org_quota["metadata"]["guid"])
 
-      msg = "Creating New Organization #{SANDBOX_ORG_NAME}"
+      msg = "Creating New Organization #{SANDBOX_ORG_NAME} on #{@environment}"
       puts msg
       if ENV["DO_SLACK"]
         begin
@@ -51,7 +52,7 @@ def process_new_users
     # if this is a new org or the user space doesn't exist in the org - create one
     if is_new_org ||
       !@cf_client.organization_space_name_exists?(sandbox_org['metadata']['guid'], user_space_name)
-      msg = "Setting up new sandbox user #{user["entity"]["username"]} in #{SANDBOX_ORG_NAME}"
+      msg = "Setting up new sandbox user #{user["entity"]["username"]} in #{SANDBOX_ORG_NAME} on #{@environment}"
       puts msg
 
       # Send alert to slack
@@ -81,17 +82,17 @@ def process_new_users
           sandbox_org_space_quota_definition['metadata']['guid'])
       # increase the org quota
       if !is_new_org
-        puts "Increasing org quota for #{SANDBOX_ORG_NAME}"
+        puts "Increasing org quota for #{SANDBOX_ORG_NAME} on #{@environment}"
         @cf_client.increase_org_quota(sandbox_org)
       end
     else
-      puts "Space #{user_space_name} already exists - skipping"
+      puts "Space #{user_space_name} already exists on #{@environment} - skipping"
     end
   end
 end
 
 while true
-  puts "Getting users"
+  puts "Getting users on #{@environment}"
   process_new_users
   sleep(ENV["SLEEP_TIMEOUT"].to_i)
 end
