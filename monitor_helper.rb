@@ -4,7 +4,7 @@ module MonitorHelper
   end
 
   def is_whitelisted_email(email)
-    email.end_with?('.gov', '.mil')
+    email.end_with?('.gov', '.mil', '.fed.us')
   end
 
   def get_sandbox_space_name(email)
