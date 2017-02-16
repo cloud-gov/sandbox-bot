@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 require 'rubygems'
 require 'oauth2'
+require 'cgi'
 
 class CFClient
 
@@ -220,7 +221,7 @@ class CFClient
 
   def organization_space_name_exists?(org_guid, space_name)
 
-    response = @token.get("#{api_url}/organizations/#{(org_guid)}/spaces?q=name:#{space_name}")
+    response = @token.get("#{api_url}/organizations/#{(org_guid)}/spaces?q=name:#{CGI.escape space_name}")
     return response.parsed["total_results"] == 1
 
   end
