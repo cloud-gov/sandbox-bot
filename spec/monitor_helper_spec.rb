@@ -35,4 +35,13 @@ describe MonitorHelper do
 
 	end
 
+	it "should extract the environment from the uaa url" do
+
+		expect(monitor_helper_test.get_cloud_environment('https://uaa.cloud.gov')).to eq 'cloud.gov'
+		expect(monitor_helper_test.get_cloud_environment('https://uaa.fr.cloud.gov')).to eq 'fr.cloud.gov'
+		expect(monitor_helper_test.get_cloud_environment('https://bad.url')).to eq 'unknown'
+
+	end
+
+
 end
