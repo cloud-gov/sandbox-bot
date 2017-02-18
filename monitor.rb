@@ -34,17 +34,6 @@ def process_new_users
         puts "Creating org quota for #{SANDBOX_ORG_NAME}"
         org_quota = @cf_client.create_organization_quota(SANDBOX_ORG_NAME)
       end
-      sandbox_org = @cf_client.create_organization(SANDBOX_ORG_NAME, org_quota["metadata"]["guid"])
-
-      msg = "Creating New Organization #{SANDBOX_ORG_NAME} on #{@environment}"
-      puts msg
-      if ENV["DO_SLACK"]
-        begin
-          @notifier.ping msg, icon_emoji: ":cloud:"
-        rescue
-          puts "Could not post #{msg} to slack"
-        end
-      end
       is_new_org = true
     end
 
