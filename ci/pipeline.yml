@@ -19,7 +19,7 @@ resources:
   type: cf
   source:
     api: {{cf-api-endpoint-staging}}
-    username: {{cf-username}}
+    username: {{cf-username-staging}}
     password: {{cf-password-staging}}
     organization: {{cf-organization}}
     space: {{cf-space}}
@@ -28,7 +28,7 @@ resources:
   type: cf
   source:
     api: {{cf-api-endpoint-production}}
-    username: {{cf-username}}
+    username: {{cf-username-production}}
     password: {{cf-password-production}}
     organization: {{cf-organization}}
     space: {{cf-space}}
