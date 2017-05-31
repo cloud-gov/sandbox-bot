@@ -32,7 +32,7 @@ def process_new_users
       org_quota = @cf_client.get_organization_quota_by_name(SANDBOX_ORG_NAME)
       if !org_quota
         puts "Creating org quota for #{SANDBOX_ORG_NAME}"
-        org_quota = @cf_client.create_organization_quota(SANDBOX_ORG_NAME)
+        @cf_client.create_organization_quota(SANDBOX_ORG_NAME)
       end
       is_new_org = true
     end
