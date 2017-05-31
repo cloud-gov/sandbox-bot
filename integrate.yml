@@ -1,0 +1,20 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: alpine
+
+inputs:
+- name: git-sandbox-bot
+- name: dotgov-domain-data
+outputs:
+- name: git-sandbox-bot-integrated
+run:
+  path: /bin/sh
+  args:
+  - -exc
+  - |
+    /bin/cp -R ./git-sandbox-bot/* git-sandbox-bot-integrated
+    /bin/cp ./dotgov-domain-data/dotgov-domains/current-federal.csv git-sandbox-bot-integrated
