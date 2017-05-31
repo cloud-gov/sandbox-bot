@@ -1,4 +1,14 @@
+require 'csv'
+
 module MonitorHelper
+
+  if ENV['DOMAIN_CSV_PATH']
+    @@domains = CSV.read(ENV['DOMAIN_CSV_PATH'], headers: true).map do |row|
+      row['Domain Name'].downcase
+    end
+  else
+    @@domains = ['.gov', '.mil']
+  end
 
 	def is_valid_email(username)
 
@@ -8,7 +18,9 @@ module MonitorHelper
 
 	def is_whitelisted_email(email)
 
-		email.end_with?('.gov', '.mil')
+    @@domains.any? do |domain|
+      email.downcase.end_with?(domain)
+    end
 
 	end
 
@@ -17,8 +29,8 @@ module MonitorHelper
 
 	def get_email_domain_name(email)
 
-    	domain = email.split('@')[1]
-    	top_level_domain = domain.split('.')[-2]
+    domain = email.split('@')[1]
+    domain.split('.')[-2]
 
 	end
 
