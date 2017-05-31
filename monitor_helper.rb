@@ -6,6 +6,9 @@ module MonitorHelper
     @@domains = CSV.read(ENV['DOMAIN_CSV_PATH'], headers: true).map do |row|
       row['Domain Name'].downcase
     end
+
+    # The GSA domain list this is likely pulling in, doesn't include .mil domains
+    @@domains.push('.mil')
   else
     @@domains = ['.gov', '.mil']
   end
@@ -29,8 +32,17 @@ module MonitorHelper
 
 	def get_email_domain_name(email)
 
+	tlds = ['.gov', '.mil', '.fed.us']
+
     domain = email.split('@')[1]
-    domain.split('.')[-2]
+
+    # remove any tlds
+	tlds.each{|t|
+		domain.slice! t
+	}
+
+	# return what we know about
+    domain.split('.')[-1]
 
 	end
 
