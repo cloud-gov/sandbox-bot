@@ -1,0 +1,143 @@
+---
+resources:
+- name: git-sandbox-bot-stage
+  type: git
+  source:
+    uri: https://github.com/18f/cg-sandbox-bot
+    branch: staging
+
+- name: git-sandbox-bot-prod
+  type: git
+  source:
+    uri: https://github.com/18f/cg-sandbox-bot
+    branch: master
+
+- name: dotgov-domain-data
+  type: git
+  source:
+    uri: https://github.com/GSA/data.git
+    branch: gh-pages
+    paths:
+    - dotgov-domains/*
+
+- name: slack
+  type: slack-notification
+  source:
+    url: {{slack-webhook-url}}
+
+- name: sandbox-bot-stage-deployment
+  type: cf
+  source:
+    api: {{cf-api-endpoint-staging}}
+    username: {{cf-username-staging}}
+    password: {{cf-password-staging}}
+    organization: {{cf-organization}}
+    space: {{cf-space}}
+    skip_cert_check: false
+
+- name: sandbox-bot-prod-deployment
+  type: cf
+  source:
+    api: {{cf-api-endpoint-production}}
+    username: {{cf-username-production}}
+    password: {{cf-password-production}}
+    organization: {{cf-organization}}
+    space: {{cf-space}}
+    skip_cert_check: false
+
+resource_types:
+- name: slack-notification
+  type: docker-image
+  source:
+    repository: cfcommunity/slack-notification-resource
+
+jobs:
+- name: deploy-sandbox-bot-stage
+  serial: true
+  serial_groups:
+  - sandbox-bot
+  plan:
+  - aggregate:
+    - get: git-sandbox-bot
+      resource: git-sandbox-bot-stage
+      trigger: true
+    - get: dotgov-domain-data
+      trigger: true
+  - task: integrate
+    file: git-sandbox-bot/integrate.yml
+  - put: sandbox-bot-stage-deployment
+    params:
+      manifest: git-sandbox-bot-integrated/manifest-staging.yml
+      path: git-sandbox-bot-integrated
+      current_app_name: sandbox-bot-staging
+      environment_variables:
+        DOMAIN_NAME: {{cf-domain-name-staging}}
+        CLIENT_ID: {{client-id}}
+        CLIENT_SECRET: {{client-secret-staging}}
+        UAA_URL: {{uaa-url-staging}}
+        DOMAIN_CSV_PATH: ./current-federal.csv
+        SLACK_HOOK: {{slack-webhook-url}}
+  on_failure:
+    put: slack
+    params:
+      text: |
+        :x: FAILED to deploy $BUILD_PIPELINE_NAME on {{cf-api-endpoint-staging}}
+        <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+      channel: {{slack-channel}}
+      username: {{slack-username}}
+      icon_url: {{slack-icon-url}}
+  on_success:
+    put: slack
+    params:
+      text: |
+        :white_check_mark: Successfully deployed $BUILD_PIPELINE_NAME on {{cf-api-endpoint-staging}}
+        <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+      channel: {{slack-channel}}
+      username: {{slack-username}}
+      icon_url: {{slack-icon-url}}
+
+- name: deploy-sandbox-bot-prod
+  serial: true
+  serial_groups:
+  - sandbox-bot
+  plan:
+  - aggregate:
+    - get: git-sandbox-bot
+      resource: git-sandbox-bot-prod
+      trigger: true
+    - get: dotgov-domain-data
+      trigger: true
+    - get: sandbox-bot-stage-deployment
+      passed: [deploy-sandbox-bot-stage]
+  - task: integrate
+    file: git-sandbox-bot/integrate.yml
+  - put: sandbox-bot-prod-deployment
+    params:
+      manifest: git-sandbox-bot-integrated/manifest.yml
+      path: git-sandbox-bot-integrated
+      current_app_name: sandbox-bot
+      environment_variables:
+        DOMAIN_NAME: {{cf-domain-name-production}}
+        CLIENT_ID: {{client-id}}
+        CLIENT_SECRET: {{client-secret-production}}
+        UAA_URL: {{uaa-url-production}}
+        DOMAIN_CSV_PATH: ./current-federal.csv
+        SLACK_HOOK: {{slack-webhook-url}}
+  on_failure:
+    put: slack
+    params:
+      text: |
+        :x: FAILED to deploy $BUILD_PIPELINE_NAME on {{cf-api-endpoint-production}}
+        <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+      channel: {{slack-channel}}
+      username: {{slack-username}}
+      icon_url: {{slack-icon-url}}
+  on_success:
+    put: slack
+    params:
+      text: |
+        :white_check_mark: Successfully deployed $BUILD_PIPELINE_NAME on {{cf-api-endpoint-production}}
+        <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+      channel: {{slack-channel}}
+      username: {{slack-username}}
+      icon_url: {{slack-icon-url}}
