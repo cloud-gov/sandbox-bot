@@ -72,7 +72,7 @@ jobs:
       current_app_name: sandbox-bot-staging
       environment_variables:
         DOMAIN_NAME: {{cf-domain-name-staging}}
-        CLIENT_ID: {{client-id}}
+        CLIENT_ID: sandbox-bot
         CLIENT_SECRET: {{client-secret-staging}}
         UAA_URL: {{uaa-url-staging}}
         DOMAIN_CSV_PATH: ./current-federal.csv
@@ -118,7 +118,7 @@ jobs:
       current_app_name: sandbox-bot
       environment_variables:
         DOMAIN_NAME: {{cf-domain-name-production}}
-        CLIENT_ID: {{client-id}}
+        CLIENT_ID: sandbox-bot
         CLIENT_SECRET: {{client-secret-production}}
         UAA_URL: {{uaa-url-production}}
         DOMAIN_CSV_PATH: ./current-federal.csv

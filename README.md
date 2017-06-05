@@ -10,7 +10,7 @@ organization in cloud.gov - creating a new organization if one does not already 
 ## Creating UAA client
 
 ```shell
-uaac client add [your-client-id] \
+uaac client add sandbox-bot \
 	--name "UAA Sandbox Monitor" \
 	--scope "cloud_controller.admin, cloud_controller.read, cloud_controller.write, openid, scim.read" \
 	--authorized_grant_types "authorization_code, client_credentials, refresh_token" \
