@@ -41,7 +41,7 @@ module MonitorHelper
   end
 
   def get_sandbox_space_name(email)
-    return email.split('@')[0].downcase
+    return email.downcase
   end
 
   def get_cloud_environment(uaa_url)
