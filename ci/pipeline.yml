@@ -1,12 +1,6 @@
 ---
 resources:
-- name: git-sandbox-bot-stage
-  type: git
-  source:
-    uri: https://github.com/18f/cg-sandbox-bot
-    branch: staging
-
-- name: git-sandbox-bot-prod
+- name: git-sandbox-bot
   type: git
   source:
     uri: https://github.com/18f/cg-sandbox-bot
@@ -59,7 +53,6 @@ jobs:
   plan:
   - aggregate:
     - get: git-sandbox-bot
-      resource: git-sandbox-bot-stage
       trigger: true
     - get: dotgov-domain-data
       trigger: true
@@ -72,7 +65,7 @@ jobs:
       current_app_name: sandbox-bot-staging
       environment_variables:
         DOMAIN_NAME: {{cf-domain-name-staging}}
-        CLIENT_ID: {{client-id}}
+        CLIENT_ID: sandbox-bot
         CLIENT_SECRET: {{client-secret-staging}}
         UAA_URL: {{uaa-url-staging}}
         DOMAIN_CSV_PATH: ./current-federal.csv
@@ -103,7 +96,7 @@ jobs:
   plan:
   - aggregate:
     - get: git-sandbox-bot
-      resource: git-sandbox-bot-prod
+      passed: [deploy-sandbox-bot-stage]
       trigger: true
     - get: dotgov-domain-data
       trigger: true
@@ -118,7 +111,7 @@ jobs:
       current_app_name: sandbox-bot
       environment_variables:
         DOMAIN_NAME: {{cf-domain-name-production}}
-        CLIENT_ID: {{client-id}}
+        CLIENT_ID: sandbox-bot
         CLIENT_SECRET: {{client-secret-production}}
         UAA_URL: {{uaa-url-production}}
         DOMAIN_CSV_PATH: ./current-federal.csv
