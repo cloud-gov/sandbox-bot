@@ -7,6 +7,8 @@ The sandbox bot monitors the cloud.gov UAA (User Account and Authentication) ser
 If a new account is created with an email address at a federal domain name ([using this list](https://github.com/GSA/data/blob/gh-pages/dotgov-domains/current-federal.csv)), it will automically create a user space within that
 organization in cloud.gov - creating a new organization if one does not already exist.
 
+See also: https://github.com/18F/cg-sandbox - which purges sandbox resources.
+
 ## Creating UAA client
 
 ```shell
