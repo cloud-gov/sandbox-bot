@@ -70,7 +70,7 @@ jobs:
         UAA_URL: {{uaa-url-staging}}
         DOMAIN_CSV_PATH: ./current-federal.csv
         SLACK_HOOK: {{slack-webhook-url}}
-        DO_SLACK: false
+        DO_SLACK: "false"
   on_failure:
     put: slack
     params:
@@ -117,7 +117,7 @@ jobs:
         UAA_URL: {{uaa-url-production}}
         DOMAIN_CSV_PATH: ./current-federal.csv
         SLACK_HOOK: {{slack-webhook-url}}
-        DO_SLACK: true
+        DO_SLACK: "true"
   on_failure:
     put: slack
     params:
