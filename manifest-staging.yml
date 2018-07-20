@@ -1,5 +1,0 @@
----
-inherit: manifest.yml
-name: sandbox-bot-staging
-env:
-  DO_SLACK: false

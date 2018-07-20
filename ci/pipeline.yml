@@ -60,7 +60,7 @@ jobs:
     file: git-sandbox-bot/integrate.yml
   - put: sandbox-bot-stage-deployment
     params:
-      manifest: git-sandbox-bot-integrated/manifest-staging.yml
+      manifest: git-sandbox-bot-integrated/manifest.yml
       path: git-sandbox-bot-integrated
       current_app_name: sandbox-bot-staging
       environment_variables:
@@ -70,6 +70,7 @@ jobs:
         UAA_URL: {{uaa-url-staging}}
         DOMAIN_CSV_PATH: ./current-federal.csv
         SLACK_HOOK: {{slack-webhook-url}}
+        DO_SLACK: false
   on_failure:
     put: slack
     params:
@@ -116,6 +117,7 @@ jobs:
         UAA_URL: {{uaa-url-production}}
         DOMAIN_CSV_PATH: ./current-federal.csv
         SLACK_HOOK: {{slack-webhook-url}}
+        DO_SLACK: true
   on_failure:
     put: slack
     params:
