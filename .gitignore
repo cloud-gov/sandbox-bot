@@ -1,3 +1,4 @@
 *secrets.yml
 credentials.yml
 .env
+.ruby-version
