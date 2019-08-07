@@ -51,7 +51,7 @@ jobs:
   serial_groups:
   - sandbox-bot
   plan:
-  - aggregate:
+  - in_parallel:
     - get: git-sandbox-bot
       trigger: true
     - get: dotgov-domain-data
@@ -95,7 +95,7 @@ jobs:
   serial_groups:
   - sandbox-bot
   plan:
-  - aggregate:
+  - in_parallel:
     - get: git-sandbox-bot
       passed: [deploy-sandbox-bot-stage]
       trigger: true
