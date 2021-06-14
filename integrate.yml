@@ -17,4 +17,4 @@ run:
   - -exc
   - |
     /bin/cp -R ./git-sandbox-bot/* git-sandbox-bot-integrated
-    /bin/cp ./dotgov-domain-data/dotgov-domains/current-federal.csv git-sandbox-bot-integrated
+    /bin/cp ./dotgov-domain-data/current-federal.csv git-sandbox-bot-integrated
