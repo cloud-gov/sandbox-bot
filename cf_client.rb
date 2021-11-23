@@ -101,6 +101,21 @@ class CFClient
     }
     sr = @token.post("#{api_url}/spaces",
         body: req.to_json)
+    space = sr.parsed
+    space_guid = space["metadata"]["guid"]
+
+    self.add_space_asg(space_guid, "public_networks_egress")
+    self.add_space_asg(space_guid, "trusted_local_networks_egress")
+
+  end
+
+  def add_space_asg(space_guid, asg_name)
+
+    asg_response = @token.get("#{api_url}/security_groups?q=name:#{CGI.escape asg_name}")
+    asg = asg_response.parsed
+    asg_guid = asg["results"][0]["metadata"]["guid"]
+
+    bind_asg_response = @token.put("#{api_url}/security_groups/#{CGI.escape asg_guid}/spaces/#{CGI.escape space_guid}")
 
   end
 
