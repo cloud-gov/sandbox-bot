@@ -113,8 +113,7 @@ class CFClient
 
     asg_response = @token.get("#{api_url}/security_groups?q=name:#{CGI.escape asg_name}")
     asg = asg_response.parsed
-    asg_guid = asg["results"][0]["metadata"]["guid"]
-
+    asg_guid = asg["resources"][0]["metadata"]["guid"]
     bind_asg_response = @token.put("#{api_url}/security_groups/#{CGI.escape asg_guid}/spaces/#{CGI.escape space_guid}")
 
   end
