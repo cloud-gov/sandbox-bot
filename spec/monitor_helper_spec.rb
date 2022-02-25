@@ -14,11 +14,12 @@ describe MonitorHelper do
 
 	end
 
-	it "should validate whitelisted emails" do
+	it "should validate allowlisted emails" do
 
-		expect(monitor_helper_test.is_whitelisted_email('test@domain.gov')).to be true
-		expect(monitor_helper_test.is_whitelisted_email('test@domain.mil')).to be true
-		expect(monitor_helper_test.is_whitelisted_email('test@domain.com')).to be false
+		expect(monitor_helper_test.is_allowlisted_email('test@gsa.gov')).to be true
+		expect(monitor_helper_test.is_allowlisted_email('test@domain.mil')).to be true
+		expect(monitor_helper_test.is_allowlisted_email('test@si.edu')).to be true
+		expect(monitor_helper_test.is_allowlisted_email('test@domain.com')).to be false
 
 	end
 

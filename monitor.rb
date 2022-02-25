@@ -34,7 +34,7 @@ def process_new_users
     break if @last_user_date && @last_user_date >= user["metadata"]["created_at"]
 
   	email = user["entity"]["username"]
-    next if !is_valid_email(email) || !is_whitelisted_email(email)
+    next if !is_valid_email(email) || !is_allowlisted_email(email)
 
     # extract the domain name from the email address
     email_domain_name = get_email_domain_name(email)

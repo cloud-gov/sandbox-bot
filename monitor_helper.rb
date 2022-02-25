@@ -10,14 +10,14 @@ module MonitorHelper
     # The GSA domain list this is likely pulling in, doesn't include .mil domains
     @@domains.push('.mil', 'si.edu')
   else
-    @@domains = ['.gov', '.mil']
+    @@domains = ['.gov', '.mil', 'si.edu']
   end
 
   def is_valid_email(username)
     !username.nil? && !username.index("@").nil?
   end
 
-  def is_whitelisted_email(email)
+  def is_allowlisted_email(email)
     @@domains.any? do |domain|
       email.downcase.end_with?(domain)
     end
