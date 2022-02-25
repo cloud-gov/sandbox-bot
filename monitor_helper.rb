@@ -8,7 +8,7 @@ module MonitorHelper
     end
 
     # The GSA domain list this is likely pulling in, doesn't include .mil domains
-    @@domains.push('.mil')
+    @@domains.push('.mil', 'si.edu')
   else
     @@domains = ['.gov', '.mil']
   end
