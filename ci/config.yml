@@ -1,0 +1,11 @@
+---
+slack-channel: '#cg-platform'
+slack-icon-url: http://cl.ly/image/3e1h0H3H2s0P/concourse-logo.png
+uaa-url-production: https://uaa.fr.cloud.gov
+uaa-url-staging: https://uaa.fr-stage.cloud.gov
+cf-api-endpoint-production: https://api.fr.cloud.gov
+cf-api-endpoint-staging: https://api.fr-stage.cloud.gov
+cf-domain-name-production: fr.cloud.gov
+cf-domain-name-staging: fr-stage.cloud.gov
+cf-organization: cloud-gov
+cf-space: bots
