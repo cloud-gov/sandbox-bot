@@ -16,29 +16,47 @@ resources:
 - name: slack
   type: slack-notification
   source:
-    url: {{slack-webhook-url}}
+    url: ((slack-webhook-url))
 
 - name: sandbox-bot-stage-deployment
   type: cf
   source:
-    api: {{cf-api-endpoint-staging}}
-    username: {{cf-username-staging}}
-    password: {{cf-password-staging}}
-    organization: {{cf-organization}}
-    space: {{cf-space}}
+    api: ((cf-api-endpoint-staging))
+    username: ((cf-staging-user.username))
+    password: ((cf-staging-user.password))
+    organization: ((cf-organization))
+    space: ((cf-space))
     skip_cert_check: false
 
 - name: sandbox-bot-prod-deployment
   type: cf
   source:
-    api: {{cf-api-endpoint-production}}
-    username: {{cf-username-production}}
-    password: {{cf-password-production}}
-    organization: {{cf-organization}}
-    space: {{cf-space}}
+    api: ((cf-api-endpoint-production))
+    username: ((cf-production-user.username))
+    password: ((cf-production-user.password))
+    organization: ((cf-organization))
+    space: ((cf-space))
     skip_cert_check: false
 
+- name: pipeline-source
+  type: git
+  source:
+    uri: https://github.com/cloud-gov/cg-sandbox-bot.git
+    branch: main
+    private_key: ((cg-ci-bot-sshkey.private_key))
+    commit_verification_keys: ((cloud-gov-pgp-keys))
+
+
 resource_types:
+- name: registry-image
+  type: registry-image
+  source:
+    aws_access_key_id: ((ecr_aws_key))
+    aws_secret_access_key: ((ecr_aws_secret))
+    repository: registry-image-resource
+    aws_region: us-gov-west-1
+    tag: latest
+    
 - name: slack-notification
   type: registry-image
   source:
@@ -67,16 +85,17 @@ resource_types:
     aws_region: us-gov-west-1
     tag: latest
 
-- name: registry-image
-  type: registry-image
-  source:
-    aws_access_key_id: ((ecr_aws_key))
-    aws_secret_access_key: ((ecr_aws_secret))
-    repository: registry-image-resource
-    aws_region: us-gov-west-1
-    tag: latest
-
 jobs:
+- name: set-self
+  plan:
+  - in_parallel:
+    - get: pipeline-source
+      trigger: true
+      params: {depth: 1}
+  - set_pipeline: self
+    file: pipeline-source/ci/pipeline.yml
+    var_files: [pipeline-source/ci/config.yml]
+
 - name: deploy-sandbox-bot-stage
   serial: true
   serial_groups:
@@ -95,31 +114,31 @@ jobs:
       path: git-sandbox-bot-integrated
       current_app_name: sandbox-bot-staging
       environment_variables:
-        DOMAIN_NAME: {{cf-domain-name-staging}}
+        DOMAIN_NAME: ((cf-domain-name-staging))
         CLIENT_ID: sandbox-bot
-        CLIENT_SECRET: {{client-secret-staging}}
-        UAA_URL: {{uaa-url-staging}}
+        CLIENT_SECRET: ((cf-staging-uaa-client.password))
+        UAA_URL: ((uaa-url-staging))
         DOMAIN_CSV_PATH: ./current-federal.csv
-        SLACK_HOOK: {{slack-webhook-url}}
+        SLACK_HOOK: ((slack-webhook-url))
         DO_SLACK: "false"
   on_failure:
     put: slack
     params:
       text: |
-        :x: FAILED to deploy $BUILD_PIPELINE_NAME on {{cf-api-endpoint-staging}}
+        :x: FAILED to deploy $BUILD_PIPELINE_NAME on ((cf-api-endpoint-staging))
         <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
-      channel: {{slack-channel}}
-      username: {{slack-username}}
-      icon_url: {{slack-icon-url}}
+      channel: ((slack-channel))
+      username: ((slack-user.username))
+      icon_url: ((slack-icon-url))
   on_success:
     put: slack
     params:
       text: |
-        :white_check_mark: Successfully deployed $BUILD_PIPELINE_NAME on {{cf-api-endpoint-staging}}
+        :white_check_mark: Successfully deployed $BUILD_PIPELINE_NAME on ((cf-api-endpoint-staging))
         <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
-      channel: {{slack-channel}}
-      username: {{slack-username}}
-      icon_url: {{slack-icon-url}}
+      channel: ((slack-channel))
+      username: ((slack-user.username))
+      icon_url: ((slack-icon-url))
 
 - name: deploy-sandbox-bot-prod
   serial: true
@@ -142,28 +161,28 @@ jobs:
       path: git-sandbox-bot-integrated
       current_app_name: sandbox-bot
       environment_variables:
-        DOMAIN_NAME: {{cf-domain-name-production}}
+        DOMAIN_NAME: ((cf-domain-name-production))
         CLIENT_ID: sandbox-bot
-        CLIENT_SECRET: {{client-secret-production}}
-        UAA_URL: {{uaa-url-production}}
+        CLIENT_SECRET: ((cf-production-uaa-client.password))
+        UAA_URL: ((uaa-url-production))
         DOMAIN_CSV_PATH: ./current-federal.csv
-        SLACK_HOOK: {{slack-webhook-url}}
+        SLACK_HOOK: ((slack-webhook-url))
         DO_SLACK: "true"
   on_failure:
     put: slack
     params:
       text: |
-        :x: FAILED to deploy $BUILD_PIPELINE_NAME on {{cf-api-endpoint-production}}
+        :x: FAILED to deploy $BUILD_PIPELINE_NAME on ((cf-api-endpoint-production))
         <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
-      channel: {{slack-channel}}
-      username: {{slack-username}}
-      icon_url: {{slack-icon-url}}
+      channel: ((slack-channel))
+      username: ((slack-user.username))
+      icon_url: ((slack-icon-url))
   on_success:
     put: slack
     params:
       text: |
-        :white_check_mark: Successfully deployed $BUILD_PIPELINE_NAME on {{cf-api-endpoint-production}}
+        :white_check_mark: Successfully deployed $BUILD_PIPELINE_NAME on ((cf-api-endpoint-production))
         <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
-      channel: {{slack-channel}}
-      username: {{slack-username}}
-      icon_url: {{slack-icon-url}}
+      channel: ((slack-channel))
+      username: ((slack-user.username))
+      icon_url: ((slack-icon-url))
