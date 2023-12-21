@@ -21,7 +21,7 @@ resources:
 - name: sandbox-bot-stage-deployment
   type: cf
   source:
-    api: ((cf-api-endpoint-staging))
+    api: ((staging-cf-api-url))
     username: ((cf-staging-user.username))
     password: ((cf-staging-user.password))
     organization: ((cf-organization))
@@ -31,7 +31,7 @@ resources:
 - name: sandbox-bot-prod-deployment
   type: cf
   source:
-    api: ((cf-api-endpoint-production))
+    api: ((prod-cf-api-url))
     username: ((cf-production-user.username))
     password: ((cf-production-user.password))
     organization: ((cf-organization))
@@ -127,7 +127,7 @@ jobs:
       text: |
         :x: FAILED to deploy $BUILD_PIPELINE_NAME on ((cf-api-endpoint-staging))
         <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
-      channel: ((slack-channel))
+      channel: ((slack-channel-failure))
       username: ((slack-user.username))
       icon_url: ((slack-icon-url))
   on_success:
@@ -174,7 +174,7 @@ jobs:
       text: |
         :x: FAILED to deploy $BUILD_PIPELINE_NAME on ((cf-api-endpoint-production))
         <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
-      channel: ((slack-channel))
+      channel: ((slack-channel-failure))
       username: ((slack-user.username))
       icon_url: ((slack-icon-url))
   on_success:
