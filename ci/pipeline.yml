@@ -125,7 +125,7 @@ jobs:
     put: slack
     params:
       text: |
-        :x: FAILED to deploy $BUILD_PIPELINE_NAME on ((cf-api-endpoint-staging))
+        :x: FAILED to deploy $BUILD_PIPELINE_NAME on ((staging-cf-api-url))
         <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
       channel: ((slack-channel-failure))
       username: ((slack-user.username))
@@ -134,7 +134,7 @@ jobs:
     put: slack
     params:
       text: |
-        :white_check_mark: Successfully deployed $BUILD_PIPELINE_NAME on ((cf-api-endpoint-staging))
+        :white_check_mark: Successfully deployed $BUILD_PIPELINE_NAME on ((staging-cf-api-url))
         <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
       channel: ((slack-channel))
       username: ((slack-user.username))
@@ -172,7 +172,7 @@ jobs:
     put: slack
     params:
       text: |
-        :x: FAILED to deploy $BUILD_PIPELINE_NAME on ((cf-api-endpoint-production))
+        :x: FAILED to deploy $BUILD_PIPELINE_NAME on ((prod-cf-api-url))
         <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
       channel: ((slack-channel-failure))
       username: ((slack-user.username))
@@ -181,7 +181,7 @@ jobs:
     put: slack
     params:
       text: |
-        :white_check_mark: Successfully deployed $BUILD_PIPELINE_NAME on ((cf-api-endpoint-production))
+        :white_check_mark: Successfully deployed $BUILD_PIPELINE_NAME on ((prod-cf-api-url))
         <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
       channel: ((slack-channel))
       username: ((slack-user.username))
