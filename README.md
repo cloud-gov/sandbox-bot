@@ -1,5 +1,5 @@
 # cg-sandbox-bot
-[![Code Climate](https://codeclimate.com/github/18F/cg-sandbox-bot/badges/gpa.svg)](https://codeclimate.com/github/18F/cg-sandbox-bot)
+[![Code Climate](https://codeclimate.com/github/cloud-gov/cg-sandbox-bot/badges/gpa.svg)](https://codeclimate.com/github/18F/cg-sandbox-bot)
 
 Monitor Cloud Foundry Cloud Controller users and create a sandbox space for known domains.
 
@@ -7,7 +7,7 @@ The sandbox bot monitors the cloud.gov UAA (User Account and Authentication) ser
 If a new account is created with an email address at a federal domain name ([using this list](https://raw.githubusercontent.com/cisagov/dotgov-data/main/current-federal.csv)), it will automically create a user space within that
 organization in cloud.gov - creating a new organization if one does not already exist.
 
-See also: https://github.com/18F/cg-sandbox - which purges sandbox resources.
+See also: https://github.com/cloud-gov/cg-sandbox - which purges sandbox resources.
 
 ## Creating UAA client
 
