@@ -4,7 +4,7 @@ module MonitorHelper
 
   if ENV['DOMAIN_CSV_PATH']
     @@domains = CSV.read(ENV['DOMAIN_CSV_PATH'], headers: true).map do |row|
-      row['Domain Name'].downcase
+      row['Domain name'].downcase
     end
 
     # The GSA domain list this is likely pulling in, doesn't include .mil domains
