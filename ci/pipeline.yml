@@ -38,14 +38,6 @@ resources:
     space: ((cf-space))
     skip_cert_check: false
 
-- name: pipeline-source
-  type: git
-  source:
-    uri: https://github.com/cloud-gov/cg-sandbox-bot.git
-    branch: main
-    private_key: ((cg-ci-bot-sshkey.private_key))
-    commit_verification_keys: ((cloud-gov-pgp-keys))
-
 
 resource_types:
 - name: registry-image
@@ -89,12 +81,12 @@ jobs:
 - name: set-self
   plan:
   - in_parallel:
-    - get: pipeline-source
+    - get: git-sandbox-bot
       trigger: true
       params: {depth: 1}
   - set_pipeline: self
-    file: pipeline-source/ci/pipeline.yml
-    var_files: [pipeline-source/ci/config.yml]
+    file: git-sandbox-bot/ci/pipeline.yml
+    var_files: [git-sandbox-bot/ci/config.yml]
 
 - name: deploy-sandbox-bot-stage
   serial: true
@@ -104,6 +96,7 @@ jobs:
   - in_parallel:
     - get: git-sandbox-bot
       trigger: true
+      passed: [set-self]
     - get: dotgov-domain-data
       trigger: true
   - task: integrate
