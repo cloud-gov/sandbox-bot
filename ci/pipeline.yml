@@ -3,7 +3,7 @@ resources:
 - name: git-sandbox-bot
   type: git
   source:
-    uri: https://github.com/18f/cg-sandbox-bot
+    uri: https://github.com/cloud-gov/cg-sandbox-bot
     branch: main
     commit_verification_keys: ((cloud-gov-pgp-keys))
 
@@ -37,14 +37,6 @@ resources:
     organization: ((cf-organization))
     space: ((cf-space))
     skip_cert_check: false
-
-- name: pipeline-source
-  type: git
-  source:
-    uri: https://github.com/cloud-gov/cg-sandbox-bot.git
-    branch: main
-    private_key: ((cg-ci-bot-sshkey.private_key))
-    commit_verification_keys: ((cloud-gov-pgp-keys))
 
 
 resource_types:
@@ -89,12 +81,12 @@ jobs:
 - name: set-self
   plan:
   - in_parallel:
-    - get: pipeline-source
+    - get: git-sandbox-bot
       trigger: true
       params: {depth: 1}
   - set_pipeline: self
-    file: pipeline-source/ci/pipeline.yml
-    var_files: [pipeline-source/ci/config.yml]
+    file: git-sandbox-bot/ci/pipeline.yml
+    var_files: [git-sandbox-bot/ci/config.yml]
 
 - name: deploy-sandbox-bot-stage
   serial: true
@@ -104,6 +96,7 @@ jobs:
   - in_parallel:
     - get: git-sandbox-bot
       trigger: true
+      passed: [set-self]
     - get: dotgov-domain-data
       trigger: true
   - task: integrate
@@ -121,22 +114,22 @@ jobs:
         DOMAIN_CSV_PATH: ./current-federal.csv
         SLACK_HOOK: ((slack-webhook-url))
         DO_SLACK: "false"
-  on_failure:
+  on_failure: &slack-failure-params
     put: slack
     params:
       text: |
         :x: FAILED to deploy $BUILD_PIPELINE_NAME on ((staging-cf-api-url))
         <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
-      channel: ((slack-channel-failure))
+      channel: ((slack-failure-channel))
       username: ((slack-user.username))
       icon_url: ((slack-icon-url))
-  on_success:
+  on_success: &slack-success-params
     put: slack
     params:
       text: |
         :white_check_mark: Successfully deployed $BUILD_PIPELINE_NAME on ((staging-cf-api-url))
         <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
-      channel: ((slack-channel))
+      channel: ((slack-success-channel))
       username: ((slack-user.username))
       icon_url: ((slack-icon-url))
 
@@ -171,18 +164,14 @@ jobs:
   on_failure:
     put: slack
     params:
+      <<: *slack-failure-params
       text: |
         :x: FAILED to deploy $BUILD_PIPELINE_NAME on ((prod-cf-api-url))
         <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
-      channel: ((slack-channel-failure))
-      username: ((slack-user.username))
-      icon_url: ((slack-icon-url))
   on_success:
     put: slack
     params:
+      <<: *slack-success-params
       text: |
         :white_check_mark: Successfully deployed $BUILD_PIPELINE_NAME on ((prod-cf-api-url))
         <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
-      channel: ((slack-channel))
-      username: ((slack-user.username))
-      icon_url: ((slack-icon-url))
