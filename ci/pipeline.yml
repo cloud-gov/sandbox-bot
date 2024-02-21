@@ -3,7 +3,7 @@ resources:
 - name: git-sandbox-bot
   type: git
   source:
-    uri: https://github.com/18f/cg-sandbox-bot
+    uri: https://github.com/cloud-gov/cg-sandbox-bot
     branch: main
     commit_verification_keys: ((cloud-gov-pgp-keys))
 
