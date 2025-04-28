@@ -26,14 +26,14 @@ def process_new_users
     is_new_org = false
 
     # save the date of the most recent user added
-    if last_user_date.nil? || last_user_date < user["metadata"]["created_at"]
-      last_user_date = user["metadata"]["created_at"]
+    if last_user_date.nil? || last_user_date < user["created_at"]
+      last_user_date = user["created_at"]
     end
 
     #break out of processing if we already processed this user in previous run
-    break if @last_user_date && @last_user_date >= user["metadata"]["created_at"]
+    break if @last_user_date && @last_user_date >= user["created_at"]
 
-  	email = user["entity"]["username"]
+  	email = user["username"]
     next if !is_valid_email(email) || !is_allowlisted_email(email)
 
     # extract the domain name from the email address
@@ -49,7 +49,7 @@ def process_new_users
         puts "Creating org quota for #{sandbox_org_name}"
         org_quota = @cf_client.create_organization_quota(sandbox_org_name)
       end
-    	sandbox_org = @cf_client.create_organization(sandbox_org_name, org_quota["metadata"]["guid"])
+    	sandbox_org = @cf_client.create_organization(sandbox_org_name, org_quota["guid"])
 
       msg = "Creating New Organization #{sandbox_org_name} on #{@environment}"
       puts msg
@@ -66,8 +66,8 @@ def process_new_users
     user_space_name = get_sandbox_space_name(email)
     # if this is a new org or the user space doesn't exist in the org - create one
     if is_new_org ||
-      !@cf_client.organization_space_name_exists?(sandbox_org['metadata']['guid'], user_space_name)
-      msg = "Setting up new sandbox user #{user["entity"]["username"]} in #{sandbox_org_name} on #{@environment}"
+      !@cf_client.organization_space_name_exists?(sandbox_org['guid'], user_space_name)
+      msg = "Setting up new sandbox user #{user["username"]} in #{sandbox_org_name} on #{@environment}"
       puts msg
 
       # Send alert to slack
@@ -80,21 +80,21 @@ def process_new_users
       end
 
       # add user to the parent org
-      @cf_client.add_user_to_org(user["metadata"]["guid"], sandbox_org['metadata']["guid"])
+      @cf_client.add_user_to_org(user["guid"], sandbox_org["guid"])
 
       #get the sandbox space quoto definition for this org - if one doesn't exist, create it
       sandbox_org_space_quota_definition =
-        @cf_client.get_organization_space_quota_definition_by_name(sandbox_org['metadata']['guid'], SANDBOX_QUOTA_NAME)
+        @cf_client.get_organization_space_quota_definition_by_name(sandbox_org['guid'], SANDBOX_QUOTA_NAME)
 
       if !sandbox_org_space_quota_definition
         sandbox_org_space_quota_definition =
-        @cf_client.create_organization_space_quota_definition(sandbox_org['metadata']["guid"], SANDBOX_QUOTA_NAME)
+        @cf_client.create_organization_space_quota_definition(sandbox_org["guid"], SANDBOX_QUOTA_NAME)
       end
 
       # create user space using the first portion of the email address as the space name
-      @cf_client.create_space(user_space_name, sandbox_org['metadata']["guid"],
-          [user["metadata"]["guid"]], [user["metadata"]["guid"]],
-          sandbox_org_space_quota_definition['metadata']['guid'])
+      @cf_client.create_space(user_space_name, sandbox_org["guid"],
+          user["guid"], user["guid"],
+          sandbox_org_space_quota_definition['guid'])
       # increase the org quota
       if !is_new_org
         puts "Increasing org quota for #{sandbox_org_name} on #{@environment}"
