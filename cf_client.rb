@@ -290,7 +290,7 @@ class CFClient
     puts "Finding organization quota #{org_quota_definition_guid}..."
     response = @token.get("#{api_url}/organization_quotas/#{org_quota_definition_guid}")
     quota = response.parsed
-    puts "Found organization quota #{org_quota_definition_guid} " #with quota #{quota}"
+    puts "Found organization quota #{org_quota_definition_guid} " 
     
     return quota
   end
