@@ -5,8 +5,6 @@ require 'cgi'
 
 class CFClient
 
-  @@domain_name = ENV["DOMAIN_NAME"]
-
   def initialize(client_id, client_secret, uaa_url)
     @client = OAuth2::Client.new(
       client_id,
@@ -18,9 +16,7 @@ class CFClient
   end
 
   def api_url
-
-    return "https://api.#{@@domain_name}/v3"
-
+    "https://api.#{ENV["DOMAIN_NAME"]}/v3"
   end
 
   def get_organization_by_name(org_name)
@@ -60,7 +56,7 @@ class CFClient
   def get_users
 
     response = @token.get("#{api_url}/users?order_by=-created_at")
-    users = response.parsed["resources"];
+    return response.parsed["resources"];
 
   end
 
