@@ -49,6 +49,7 @@ PLATFORMS
 
 DEPENDENCIES
   base64
+  bigdecimal
   oauth2 (~> 1.4.0)
   rspec
   slack-notifier

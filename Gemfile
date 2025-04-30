@@ -3,6 +3,7 @@ source "https://rubygems.org"
 ruby "~> 3.4.2"
 
 gem "base64"
+gem "bigdecimal"
 gem "oauth2", "~> 1.4.0"
 gem "slack-notifier"
 gem "rspec"
