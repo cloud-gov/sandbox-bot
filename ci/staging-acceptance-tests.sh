@@ -182,7 +182,6 @@ else
 fi
 
 echo "🎯 Finished all checks."
-EOF
 
 
 ## Clean up users
