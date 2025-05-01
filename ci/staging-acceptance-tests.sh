@@ -44,7 +44,7 @@ while (( attempt <= MAX_ATTEMPTS )); do
     break
   fi
 
-  echo "❌ Org '$ORG_NAME' not found. Retrying in $SLEEP_SECONDS seconds..."
+  echo "⏳ Org '$ORG_NAME' not found. Retrying in $SLEEP_SECONDS seconds..."
   sleep "$SLEEP_SECONDS"
   ((attempt++))
 done
@@ -122,7 +122,7 @@ while (( attempt <= MAX_ATTEMPTS )); do
     break
   fi
 
-  echo "❌ Org '$ORG_NAME' not found. Retrying in $SLEEP_SECONDS seconds..."
+  echo "⏳ Spaces '${SPACE_NAMES[*]}' not found. Retrying in $SLEEP_SECONDS seconds..."
   sleep "$SLEEP_SECONDS"
   ((attempt++))
 done
