@@ -8,6 +8,7 @@ GEM
     crack (1.0.0)
       bigdecimal
       rexml
+    csv (3.3.4)
     diff-lcs (1.6.1)
     faraday (1.0.1)
       multipart-post (>= 1.2, < 3)
@@ -49,6 +50,8 @@ PLATFORMS
 
 DEPENDENCIES
   base64
+  bigdecimal
+  csv
   oauth2 (~> 1.4.0)
   rspec
   slack-notifier
