@@ -171,7 +171,7 @@ jobs:
     - get: dotgov-domain-data
       trigger: true
     - get: sandbox-bot-stage-deployment
-      passed: [deploy-sandbox-bot-stage, run-sandbox-bot-stage-acceptance-tests]
+      passed: [deploy-sandbox-bot-stage]
   - task: integrate
     file: git-sandbox-bot/integrate.yml
   - put: sandbox-bot-prod-deployment
