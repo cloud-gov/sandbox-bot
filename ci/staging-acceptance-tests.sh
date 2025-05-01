@@ -54,15 +54,6 @@ if (( attempt > MAX_ATTEMPTS )); then
   exit 1
 fi
 
-
-echo "🔍 Checking for org '$ORG_NAME'..."
-if cf orgs | grep -q "^$ORG_NAME$"; then
-  echo "✅ Org '$ORG_NAME' found. Targeting..."
-  cf target -o "$ORG_NAME" >/dev/null 2>&1
-else
-  echo "❌ Org '$ORG_NAME' not found."
-fi
-
 echo "🔍 Checking org quota for '$ORG_NAME'..."
 org_quota=$(cf org "$ORG_NAME" | awk -F': ' '/quota:/ {print $2}' | tr -d '[:space:]' || echo "UNKNOWN")
 if [[ "$org_quota" == "$EXPECTED_ORG_QUOTA" ]]; then
