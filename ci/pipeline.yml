@@ -144,7 +144,7 @@ jobs:
       passed: [deploy-sandbox-bot-stage]
       trigger: true
   - task: sandbox-bot-stage-acceptance-tests
-    file: git-sandbox-bot-integrated/manifest.yml
+    file: git-sandbox-bot/ci/staging-acceptance-tests.yml
     params:
       CF_API: ((cf-api-staging))
       CF_ADMIN_USER: ((admin-user-staging))
