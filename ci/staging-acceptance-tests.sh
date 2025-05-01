@@ -146,9 +146,10 @@ for space in "${SPACE_NAMES[@]}"; do
 
   echo "🔍 Verifying running security groups from 'cf space $space' output..."
   space_output=$(cf space "$space")
+  running_groups=$(awk -F': ' '/running security groups:/ {print $2}' <<< "$space_output" | tr -d '[:space:]')
 
   for group in "${REQUIRED_SECURITY_GROUPS[@]}"; do
-    if grep -A 10 "running security groups" <<< "$space_output" | grep -q "$group"; then
+    if grep -q "$group" <<< "$running_groups"; then
       echo "✅ Running security group '$group' is listed in space config"
     else
       echo "❌ Missing required running security group '$group' in space config"
