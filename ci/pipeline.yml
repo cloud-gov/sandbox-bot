@@ -133,7 +133,8 @@ jobs:
       username: ((slack-user.username))
       icon_url: ((slack-icon-url))
 
-- name: deploy-sandbox-bot-prod
+
+- name: run-sandbox-bot-stage-acceptance-tests
   serial: true
   serial_groups:
   - sandbox-bot
@@ -142,10 +143,35 @@ jobs:
     - get: git-sandbox-bot
       passed: [deploy-sandbox-bot-stage]
       trigger: true
+  - task: sandbox-bot-stage-acceptance-tests
+    file: git-sandbox-bot-integrated/manifest.yml
+    params:
+      CF_API: ((cf-api-staging))
+      CF_ADMIN_USER: ((admin-user-staging))
+      CF_ADMIN_PASSWORD: ((admin-password-staging))
+  on_failure:
+    put: slack
+    params:
+      <<: *slack-failure-params
+      text: |
+        :x: FAILED to run staging acceptance tests $BUILD_PIPELINE_NAME on ((staging-cf-api-url))
+        <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+ 
+
+
+- name: deploy-sandbox-bot-prod
+  serial: true
+  serial_groups:
+  - sandbox-bot
+  plan:
+  - in_parallel:
+    - get: git-sandbox-bot
+      passed: [deploy-sandbox-bot-stage, run-sandbox-bot-stage-acceptance-tests]
+      trigger: true
     - get: dotgov-domain-data
       trigger: true
     - get: sandbox-bot-stage-deployment
-      passed: [deploy-sandbox-bot-stage]
+      passed: [deploy-sandbox-bot-stage, run-sandbox-bot-stage-acceptance-tests]
   - task: integrate
     file: git-sandbox-bot/integrate.yml
   - put: sandbox-bot-prod-deployment

@@ -1,8 +1,13 @@
 #!/bin/bash
 
+set -uo pipefail
+
 # These are destructive acceptance tests which should only be run in STAGING, there are explicit checks for this, do not override them
 # Requires a user with cloud_controller.admin access to run since it will be creating/deleting users, organizations and org quotas
 # These are destructive to the `sandbox-fedramp`.  This org was chosen since it: wasn't in use, we have email access to the domain, should remain in the CSV file maintaining the list of verified gov agencies
+
+# Log into CF as an admin
+cf login -a ${CF_API} -u ${CF_ADMIN_USER} -p "${CF_ADMIN_PASSWORD}" -o cloud-gov -s bots
 
 # Confirm that we're targeting the correct API
 api_target=$(cf api | grep -i 'API endpoint' | awk '{print $3}')
