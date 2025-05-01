@@ -7,7 +7,8 @@ set -uo pipefail
 # These are destructive to the `sandbox-fedramp`.  This org was chosen since it: wasn't in use, we have email access to the domain, should remain in the CSV file maintaining the list of verified gov agencies
 
 # Log into CF as an admin
-cf login -a ${CF_API} -u ${CF_ADMIN_USER} -p "${CF_ADMIN_PASSWORD}" -o cloud-gov -s bots
+echo "Logging into ${CF_API} as user ${CF_ADMIN_USER}..."
+cf login -a ${CF_API} -u ${CF_ADMIN_USER} -p "${CF_ADMIN_PASSWORD}" -o cloud-gov -s bots >/dev/null 2>&1
 
 # Confirm that we're targeting the correct API
 api_target=$(cf api | grep -i 'API endpoint' | awk '{print $3}')
@@ -25,7 +26,7 @@ echo "Creating CF user test.user@fedramp.gov with a random password..."
 cf create-user "test.user@fedramp.gov" "$PASSWORD" >/dev/null 2>&1
 
 # Sleep for 45 seconds, app runs every 30 seconds
-echo "Sleeping for 45 seconds..."
+echo "Sleeping test for 45 seconds to wait for sandbox-bot app to process the new user..."
 sleep 45
 
 # Observe the output from the app, it should create a new org, space and quotas within 30 seconds
@@ -107,14 +108,12 @@ else
   echo "❌ Service instances mismatch: Expected '10', got '$services'"
 fi
 
-#echo "🎯 Finished all checks."
-
 PASSWORD=$(cat /dev/urandom | base64 | tr -dc '0-9a-zA-Z' | head -c32)
-echo "Creating CF user test.user2@fedramp.gov with a random password..."
+echo "Creating a second CF user test.user2@fedramp.gov with a random password..."
 cf create-user "test.user2@fedramp.gov" "$PASSWORD" >/dev/null 2>&1
 
 # Sleep for 45 seconds, app runs every 30 seconds
-echo "Sleeping for 45 seconds..."
+echo "Sleeping test for 45 seconds to wait for sandbox-bot app to process the new user..."
 sleep 45
 
 # Verify the second space was created
