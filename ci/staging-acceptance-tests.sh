@@ -41,6 +41,7 @@ while (( attempt <= MAX_ATTEMPTS )); do
 
   if cf org "$ORG_NAME" &>/dev/null; then
     echo "✅ Organization '$ORG_NAME' found."
+    cf target -o "$ORG_NAME" >/dev/null 2>&1
     break
   fi
 
