@@ -6,6 +6,25 @@ set -uo pipefail
 # Requires a user with cloud_controller.admin access to run since it will be creating/deleting users, organizations and org quotas
 # These are destructive to the `sandbox-fedramp`.  This org was chosen since it: wasn't in use, we have email access to the domain, should remain in the CSV file maintaining the list of verified gov agencies
 
+cleanup_sandbox_resources() {
+  local user1="test.user@fedramp.gov"
+  local user2="test.user2@fedramp.gov"
+  local org_name="sandbox-fedramp"
+  local org_quota="sandbox-fedramp"
+
+  echo "🔧 Deleting users..."
+  cf delete-user "$user1" -f
+  cf delete-user "$user2" -f
+
+  echo "🏢 Deleting organization '$org_name'..."
+  cf delete-org "$org_name" -f
+
+  echo "📉 Deleting org quota '$org_quota'..."
+  cf delete-org-quota "$org_quota" -f
+}
+
+
+
 # Log into CF as an admin
 echo "Logging into ${CF_API} as user ${CF_ADMIN_USER}..."
 cf login -a ${CF_API} -u ${CF_ADMIN_USER} -p "${CF_ADMIN_PASSWORD}" -o cloud-gov -s bots >/dev/null 2>&1
@@ -17,6 +36,9 @@ if [[ "$api_target" != *"fr-stage"* ]]; then
   echo "Error: Not targeting staging. Current API endpoint: $api_target, exiting for your own safety."
   exit 1
 fi
+
+# Cleanup from a previous run in case it errored out
+cleanup_sandbox_resources
 
 # Create a random 32-character password with hyphens
 PASSWORD=$(cat /dev/urandom | base64 | tr -dc '0-9a-zA-Z' | head -c32)
@@ -190,15 +212,6 @@ if [[ "$api_target" != *"fr-stage"* ]]; then
   exit 1
 fi
 
-cf delete-user "test.user@fedramp.gov" -f
-cf delete-user "test.user2@fedramp.gov" -f
-
-## Remove org
-ORG_NAME="sandbox-fedramp"
-cf delete-org "$ORG_NAME" -f 
-
-## Clean up org quota
-EXPECTED_ORG_QUOTA="sandbox-fedramp"
-cf delete-org-quota "$EXPECTED_ORG_QUOTA" -f
+cleanup_sandbox_resources
 
 echo "~fin~"
