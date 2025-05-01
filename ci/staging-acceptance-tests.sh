@@ -25,16 +25,35 @@ PASSWORD=$(cat /dev/urandom | base64 | tr -dc '0-9a-zA-Z' | head -c32)
 echo "Creating CF user test.user@fedramp.gov with a random password..."
 cf create-user "test.user@fedramp.gov" "$PASSWORD" >/dev/null 2>&1
 
-# Sleep for 45 seconds, app runs every 30 seconds
-echo "Sleeping test for 45 seconds to wait for sandbox-bot app to process the new user..."
-sleep 45
-
 # Observe the output from the app, it should create a new org, space and quotas within 30 seconds
 ORG_NAME="sandbox-fedramp"
 SPACE_NAME="test.user"
 EXPECTED_ORG_QUOTA="sandbox-fedramp"
 EXPECTED_SPACE_QUOTA="sandbox_quota"
 REQUIRED_SECURITY_GROUPS=("public_networks_egress" "trusted_local_networks_egress")
+MAX_ATTEMPTS=20
+SLEEP_SECONDS=5
+
+
+attempt=1
+while (( attempt <= MAX_ATTEMPTS )); do
+  echo "Attempt $attempt: 🔍 Checking for org '$ORG_NAME'..."
+
+  if cf org "$ORG_NAME" &>/dev/null; then
+    echo "✅ Organization '$ORG_NAME' found."
+    break
+  fi
+
+  echo "❌ Org '$ORG_NAME' not found. Retrying in $SLEEP_SECONDS seconds..."
+  sleep "$SLEEP_SECONDS"
+  ((attempt++))
+done
+
+if (( attempt > MAX_ATTEMPTS )); then
+  echo "❗️Failed to find org '$ORG_NAME' after $MAX_ATTEMPTS attempts."
+  exit 1
+fi
+
 
 echo "🔍 Checking for org '$ORG_NAME'..."
 if cf orgs | grep -q "^$ORG_NAME$"; then
@@ -45,47 +64,19 @@ else
 fi
 
 echo "🔍 Checking org quota for '$ORG_NAME'..."
-org_quota=$(cf org "$ORG_NAME" | awk -F': ' '/quota:/ {print $2}' | xargs || echo "UNKNOWN")
+org_quota=$(cf org "$ORG_NAME" | awk -F': ' '/quota:/ {print $2}' | tr -d '[:space:]' || echo "UNKNOWN")
 if [[ "$org_quota" == "$EXPECTED_ORG_QUOTA" ]]; then
   echo "✅ Org quota is '$org_quota'"
 else
   echo "❌ Org quota mismatch. Expected '$EXPECTED_ORG_QUOTA', got '$org_quota'"
 fi
 
-echo "🔍 Checking spaces for org '$ORG_NAME'..."
-spaces_output=$(cf spaces)
-space_count=$(echo "$spaces_output" | grep -c "^$SPACE_NAME$")
-if [[ "$space_count" -eq 1 ]]; then
-  echo "✅ Space '$SPACE_NAME' found."
-  cf target -s "$SPACE_NAME" >/dev/null 2>&1
-else
-  echo "❌ Expected one space named '$SPACE_NAME', found $space_count"
-fi
-
-echo "🔍 Checking space quota for space '$SPACE_NAME'..."
-space_quota=$(cf space "$SPACE_NAME" | awk -F': ' '/quota:/ {print $2}' | xargs || echo "UNKNOWN")
-if [[ "$space_quota" == "$EXPECTED_SPACE_QUOTA" ]]; then
-  echo "✅ Space quota is '$space_quota'"
-else
-  echo "❌ Space quota mismatch. Expected '$EXPECTED_SPACE_QUOTA', got '$space_quota'"
-fi
-
-echo "🔍 Verifying running security groups from 'cf space $SPACE_NAME' output..."
-space_output=$(cf space "$SPACE_NAME")
-
-for group in "${REQUIRED_SECURITY_GROUPS[@]}"; do
-  if grep -A 10 "running security groups" <<< "$space_output" | grep -q "$group"; then
-    echo "✅ Running security group '$group' is listed in space config"
-  else
-    echo "❌ Missing required running security group '$group' in space config"
-  fi
-done
 
 echo "🔍 Checking org quota resource limits from 'cf org-quota $ORG_NAME'..."
 org_quota_output=$(cf org-quota "$ORG_NAME")
 
 # Total memory
-total_memory=$(awk -F': ' '/total memory:/ {print $2}' <<< "$org_quota_output" | xargs)
+total_memory=$(awk -F': ' '/total memory:/ {print $2}' <<< "$org_quota_output" | tr -d '[:space:]')
 if [[ "$total_memory" == "1G" ]]; then
   echo "✅ Total memory is 1G"
 else
@@ -93,7 +84,7 @@ else
 fi
 
 # Routes
-routes=$(awk -F': ' '/routes:/ {print $2}' <<< "$org_quota_output" | xargs)
+routes=$(awk -F': ' '/routes:/ {print $2}' <<< "$org_quota_output" | tr -d '[:space:]')
 if [[ "$routes" == "10" ]]; then
   echo "✅ Routes is 10"
 else
@@ -101,7 +92,7 @@ else
 fi
 
 # Service instances
-services=$(awk -F': ' '/service instances:/ {print $2}' <<< "$org_quota_output" | xargs)
+services=$(awk -F': ' '/service instances:/ {print $2}' <<< "$org_quota_output" | tr -d '[:space:]')
 if [[ "$services" == "10" ]]; then
   echo "✅ Service instances is 10"
 else
@@ -112,26 +103,33 @@ PASSWORD=$(cat /dev/urandom | base64 | tr -dc '0-9a-zA-Z' | head -c32)
 echo "Creating a second CF user test.user2@fedramp.gov with a random password..."
 cf create-user "test.user2@fedramp.gov" "$PASSWORD" >/dev/null 2>&1
 
-# Sleep for 45 seconds, app runs every 30 seconds
-echo "Sleeping test for 45 seconds to wait for sandbox-bot app to process the new user..."
-sleep 45
 
-# Verify the second space was created
-
+MAX_ATTEMPTS=20
+SLEEP_SECONDS=5
 SPACE_NAMES=("test.user" "test.user2")
 
-echo "🔍 Verifying exactly two spaces named 'test.user' and 'test.user2'..."
-spaces_output=$(cf spaces | awk 'NR>3' | xargs -n1)
-actual_spaces=($(echo "$spaces_output"))
-expected_spaces_sorted=($(printf "%s\n" "${SPACE_NAMES[@]}" | sort))
-actual_spaces_sorted=($(printf "%s\n" "${actual_spaces[@]}" | sort))
+attempt=1
+while (( attempt <= MAX_ATTEMPTS )); do
+  echo "Attempt $attempt: 🔍 Verifying exactly two spaces named 'test.user' and 'test.user2'..."
 
-if [[ "${#actual_spaces_sorted[@]}" -eq 2 && "${actual_spaces_sorted[*]}" == "${expected_spaces_sorted[*]}" ]]; then
-  echo "✅ Found exactly the expected spaces: ${SPACE_NAMES[*]}"
-else
-  echo "❌ Space mismatch."
-  echo "   Expected: ${SPACE_NAMES[*]}"
-  echo "   Found: ${actual_spaces[*]}"
+  spaces_output=$(cf spaces | awk 'NR>3' | xargs -n1)
+  actual_spaces=($(echo "$spaces_output"))
+  expected_spaces_sorted=($(printf "%s\n" "${SPACE_NAMES[@]}" | sort))
+  actual_spaces_sorted=($(printf "%s\n" "${actual_spaces[@]}" | sort))
+
+  if [[ "${#actual_spaces_sorted[@]}" -eq 2 && "${actual_spaces_sorted[*]}" == "${expected_spaces_sorted[*]}" ]]; then
+    echo "✅ Found exactly the expected spaces: ${SPACE_NAMES[*]}"
+    break
+  fi
+
+  echo "❌ Org '$ORG_NAME' not found. Retrying in $SLEEP_SECONDS seconds..."
+  sleep "$SLEEP_SECONDS"
+  ((attempt++))
+done
+
+if (( attempt > MAX_ATTEMPTS )); then
+  echo "❗️Failed to find spaces '${SPACE_NAMES[*]}' after $MAX_ATTEMPTS attempts."
+  exit 1
 fi
 
 for space in "${SPACE_NAMES[@]}"; do
@@ -139,7 +137,7 @@ for space in "${SPACE_NAMES[@]}"; do
   cf target -s "$space" >/dev/null 2>&1
 
   echo "🔍 Checking space quota for space '$space'..."
-  space_quota=$(cf space "$space" | awk -F': ' '/quota:/ {print $2}' | xargs || echo "UNKNOWN")
+  space_quota=$(cf space "$space" | awk -F': ' '/quota:/ {print $2}' | tr -d '[:space:]' || echo "UNKNOWN")
   if [[ "$space_quota" == "$EXPECTED_SPACE_QUOTA" ]]; then
     echo "✅ Space quota is '$space_quota'"
   else
@@ -162,7 +160,7 @@ echo "🔍 Checking org quota resource limits from 'cf org-quota $ORG_NAME'..."
 org_quota_output=$(cf org-quota "$ORG_NAME")
 
 # Total memory
-total_memory=$(awk -F': ' '/total memory:/ {print $2}' <<< "$org_quota_output" | xargs)
+total_memory=$(awk -F': ' '/total memory:/ {print $2}' <<< "$org_quota_output" | tr -d '[:space:]')
 if [[ "$total_memory" == "2G" ]]; then
   echo "✅ Total memory is 2G"
 else
@@ -170,7 +168,7 @@ else
 fi
 
 # Routes
-routes=$(awk -F': ' '/routes:/ {print $2}' <<< "$org_quota_output" | xargs)
+routes=$(awk -F': ' '/routes:/ {print $2}' <<< "$org_quota_output" | tr -d '[:space:]')
 if [[ "$routes" == "20" ]]; then
   echo "✅ Routes is 20"
 else
@@ -178,7 +176,7 @@ else
 fi
 
 # Service instances
-services=$(awk -F': ' '/service instances:/ {print $2}' <<< "$org_quota_output" | xargs)
+services=$(awk -F': ' '/service instances:/ {print $2}' <<< "$org_quota_output" | tr -d '[:space:]')
 if [[ "$services" == "20" ]]; then
   echo "✅ Service instances is 20"
 else
