@@ -2,15 +2,14 @@
 
 set -uo pipefail
 
-# These are destructive acceptance tests which should only be run in STAGING, there are explicit checks for this, do not override them
 # Requires a user with cloud_controller.admin access to run since it will be creating/deleting users, organizations and org quotas
-# These are destructive to the `sandbox-fedramp`.  This org was chosen since it: wasn't in use, we have email access to the domain, should remain in the CSV file maintaining the list of verified gov agencies
+# These are destructive to the `sandbox-test`, this agency (test.gov) does not exist and is added manually to the CSV results specifically for testing.  
 
 cleanup_sandbox_resources() {
-  local user1="test.user@fedramp.gov"
-  local user2="test.user2@fedramp.gov"
-  local org_name="sandbox-fedramp"
-  local org_quota="sandbox-fedramp"
+  local user1="test.user@test.gov"
+  local user2="test.user2@test.gov"
+  local org_name="sandbox-test"
+  local org_quota="sandbox-test"
 
   echo "🔧 Deleting users..."
   cf delete-user "$user1" -f
@@ -52,9 +51,9 @@ check_org_is_safe_to_remove() {
 }
 
 # Set variables
-ORG_NAME="sandbox-fedramp"
+ORG_NAME="sandbox-test"
 SPACE_NAME="test.user"
-EXPECTED_ORG_QUOTA="sandbox-fedramp"
+EXPECTED_ORG_QUOTA="sandbox-test"
 EXPECTED_SPACE_QUOTA="sandbox_quota"
 REQUIRED_SECURITY_GROUPS=("public_networks_egress" "trusted_local_networks_egress")
 SPACE_NAMES=("test.user" "test.user2")
@@ -67,7 +66,6 @@ cf login -a ${CF_API} -u ${CF_ADMIN_USER} -p "${CF_ADMIN_PASSWORD}" -o cloud-gov
 # Confirm that we're targeting the correct API
 api_target=$(cf api | grep -i 'API endpoint' | awk '{print $3}')
 if [[ "$api_target" != *"fr-stage"* ]]; then
-  echo "### THIS IS A DESTRUCTIVE TEST to the sandbox-fedramp org, DO NOT RUN IN PRODUCTION ###"
   echo "Error: Not targeting staging. Current API endpoint: $api_target, exiting for your own safety."
   exit 1
 fi
@@ -79,8 +77,8 @@ cleanup_sandbox_resources
 PASSWORD=$(cat /dev/urandom | base64 | tr -dc '0-9a-zA-Z' | head -c32)
 
 # Create the user
-echo "Creating CF user test.user@fedramp.gov with a random password..."
-cf create-user "test.user@fedramp.gov" "$PASSWORD" >/dev/null 2>&1
+echo "Creating CF user test.user@test.gov with a random password..."
+cf create-user "test.user@test.gov" "$PASSWORD" >/dev/null 2>&1
 
 # Observe the output from the app, it should create a new org, space and quotas within 30 seconds
 MAX_ATTEMPTS=20
@@ -143,8 +141,8 @@ else
 fi
 
 PASSWORD=$(cat /dev/urandom | base64 | tr -dc '0-9a-zA-Z' | head -c32)
-echo "Creating a second CF user test.user2@fedramp.gov with a random password..."
-cf create-user "test.user2@fedramp.gov" "$PASSWORD" >/dev/null 2>&1
+echo "Creating a second CF user test.user2@test.gov with a random password..."
+cf create-user "test.user2@test.gov" "$PASSWORD" >/dev/null 2>&1
 
 
 MAX_ATTEMPTS=20
@@ -235,7 +233,6 @@ echo "Cleaning up resources from the test..."
 # Confirm that we're targeting the correct API
 api_target=$(cf api | grep -i 'API endpoint' | awk '{print $3}')
 if [[ "$api_target" != *"fr-stage"* ]]; then
-  echo "### THIS IS A DESTRUCTIVE TEST to the sandbox-fedramp org, DO NOT RUN IN PRODUCTION ###"
   echo "Error: Not targeting staging. Current API endpoint: $api_target, exiting for your own safety."
   exit 1
 fi
