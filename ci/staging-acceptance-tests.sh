@@ -16,6 +16,9 @@ cleanup_sandbox_resources() {
   cf delete-user "$user1" -f
   cf delete-user "$user2" -f
 
+  #Check that org and org quota are safe to delete
+  check_org_is_safe_to_remove
+
   echo "🏢 Deleting organization '$org_name'..."
   cf delete-org "$org_name" -f
 
@@ -23,6 +26,38 @@ cleanup_sandbox_resources() {
   cf delete-org-quota "$org_quota" -f
 }
 
+check_org_is_safe_to_remove() {
+
+  # Check if the org exists
+  if ! cf org "$ORG_NAME" >/dev/null 2>&1; then
+    echo "🔍 Org '${ORG_NAME}' not found, safe to run cleanup."
+    return
+  fi
+
+  # Verifying exactly 0 or two spaces named 'test.user' and 'test.user2'..."
+  cf target -o "$ORG_NAME" >/dev/null 2>&1
+  spaces_output=$(cf spaces | awk 'NR>3' | xargs -n1)
+  actual_spaces=($(echo "$spaces_output"))
+  expected_spaces_sorted=($(printf "%s\n" "${SPACE_NAMES[@]}" | sort))
+  actual_spaces_sorted=($(printf "%s\n" "${actual_spaces[@]}" | sort))
+
+  if [[ "${#actual_spaces_sorted[@]}" -eq 0 || ("${#actual_spaces_sorted[@]}" -eq 2 && "${actual_spaces_sorted[*]}" == "${expected_spaces_sorted[*]}" ) ]]; then
+    echo "🔍 Spaces found '${actual_spaces_sorted[*]}', safe to run cleanup."
+    return
+  fi
+
+  # If you get to this point, the org exists but there are other spaces
+  echo "❌ Cancelling clean up: expected spaces: '${expected_spaces_sorted[*]}', got '${actual_spaces_sorted[*]}'"
+  exit 1
+}
+
+# Set variables
+ORG_NAME="sandbox-fedramp"
+SPACE_NAME="test.user"
+EXPECTED_ORG_QUOTA="sandbox-fedramp"
+EXPECTED_SPACE_QUOTA="sandbox_quota"
+REQUIRED_SECURITY_GROUPS=("public_networks_egress" "trusted_local_networks_egress")
+SPACE_NAMES=("test.user" "test.user2")
 
 
 # Log into CF as an admin
@@ -48,14 +83,8 @@ echo "Creating CF user test.user@fedramp.gov with a random password..."
 cf create-user "test.user@fedramp.gov" "$PASSWORD" >/dev/null 2>&1
 
 # Observe the output from the app, it should create a new org, space and quotas within 30 seconds
-ORG_NAME="sandbox-fedramp"
-SPACE_NAME="test.user"
-EXPECTED_ORG_QUOTA="sandbox-fedramp"
-EXPECTED_SPACE_QUOTA="sandbox_quota"
-REQUIRED_SECURITY_GROUPS=("public_networks_egress" "trusted_local_networks_egress")
 MAX_ATTEMPTS=20
 SLEEP_SECONDS=5
-
 
 attempt=1
 while (( attempt <= MAX_ATTEMPTS )); do
@@ -120,7 +149,6 @@ cf create-user "test.user2@fedramp.gov" "$PASSWORD" >/dev/null 2>&1
 
 MAX_ATTEMPTS=20
 SLEEP_SECONDS=5
-SPACE_NAMES=("test.user" "test.user2")
 
 attempt=1
 while (( attempt <= MAX_ATTEMPTS )); do
