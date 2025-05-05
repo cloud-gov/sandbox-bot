@@ -2,9 +2,8 @@
 
 set -uo pipefail
 
-# These are destructive acceptance tests which should only be run in STAGING, there are explicit checks for this, do not override them
 # Requires a user with cloud_controller.admin access to run since it will be creating/deleting users, organizations and org quotas
-# These are destructive to the `sandbox-test`.  This org was chosen since it: wasn't in use, we have email access to the domain, should remain in the CSV file maintaining the list of verified gov agencies
+# These are destructive to the `sandbox-test`, this agency (test.gov) does not exist and is added manually to the CSV results specifically for testing..  
 
 cleanup_sandbox_resources() {
   local user1="test.user@test.gov"
@@ -67,7 +66,6 @@ cf login -a ${CF_API} -u ${CF_ADMIN_USER} -p "${CF_ADMIN_PASSWORD}" -o cloud-gov
 # Confirm that we're targeting the correct API
 api_target=$(cf api | grep -i 'API endpoint' | awk '{print $3}')
 if [[ "$api_target" != *"fr-stage"* ]]; then
-  echo "### THIS IS A DESTRUCTIVE TEST to the sandbox-test org, DO NOT RUN IN PRODUCTION ###"
   echo "Error: Not targeting staging. Current API endpoint: $api_target, exiting for your own safety."
   exit 1
 fi
@@ -235,7 +233,6 @@ echo "Cleaning up resources from the test..."
 # Confirm that we're targeting the correct API
 api_target=$(cf api | grep -i 'API endpoint' | awk '{print $3}')
 if [[ "$api_target" != *"fr-stage"* ]]; then
-  echo "### THIS IS A DESTRUCTIVE TEST to the sandbox-test org, DO NOT RUN IN PRODUCTION ###"
   echo "Error: Not targeting staging. Current API endpoint: $api_target, exiting for your own safety."
   exit 1
 fi
