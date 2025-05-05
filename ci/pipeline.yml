@@ -4,7 +4,7 @@ resources:
   type: git
   source:
     uri: https://github.com/cloud-gov/cg-sandbox-bot
-    branch: test-gov #main
+    branch: main
     commit_verification_keys: ((cloud-gov-pgp-keys))
 
 - name: dotgov-domain-data
