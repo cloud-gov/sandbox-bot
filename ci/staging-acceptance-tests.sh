@@ -3,7 +3,7 @@
 set -uo pipefail
 
 # Requires a user with cloud_controller.admin access to run since it will be creating/deleting users, organizations and org quotas
-# These are destructive to the `sandbox-test`, this agency (test.gov) does not exist and is added manually to the CSV results specifically for testing..  
+# These are destructive to the `sandbox-test`, this agency (test.gov) does not exist and is added manually to the CSV results specifically for testing.  
 
 cleanup_sandbox_resources() {
   local user1="test.user@test.gov"
