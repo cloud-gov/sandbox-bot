@@ -63,13 +63,6 @@ SPACE_NAMES=("test.user" "test.user2")
 echo "Logging into ${CF_API} as user ${CF_ADMIN_USER}..."
 cf login -a ${CF_API} -u ${CF_ADMIN_USER} -p "${CF_ADMIN_PASSWORD}" -o cloud-gov -s bots >/dev/null 2>&1
 
-# Confirm that we're targeting the correct API
-api_target=$(cf api | grep -i 'API endpoint' | awk '{print $3}')
-if [[ "$api_target" != *"fr-stage"* ]]; then
-  echo "Error: Not targeting staging. Current API endpoint: $api_target, exiting for your own safety."
-  exit 1
-fi
-
 # Cleanup from a previous run in case it errored out
 cleanup_sandbox_resources
 
@@ -229,13 +222,6 @@ echo "🎯 Finished all checks."
 
 ## Clean up users
 echo "Cleaning up resources from the test..."
-
-# Confirm that we're targeting the correct API
-api_target=$(cf api | grep -i 'API endpoint' | awk '{print $3}')
-if [[ "$api_target" != *"fr-stage"* ]]; then
-  echo "Error: Not targeting staging. Current API endpoint: $api_target, exiting for your own safety."
-  exit 1
-fi
 
 cleanup_sandbox_resources
 
