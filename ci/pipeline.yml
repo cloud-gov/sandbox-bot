@@ -144,7 +144,7 @@ jobs:
       passed: [deploy-sandbox-bot-stage]
       trigger: true
   - task: sandbox-bot-stage-acceptance-tests
-    file: git-sandbox-bot/ci/staging-acceptance-tests.yml
+    file: git-sandbox-bot/ci/acceptance-tests.yml
     params:
       CF_API: ((cf-api-staging))
       CF_ADMIN_USER: ((admin-user-staging))
@@ -201,3 +201,28 @@ jobs:
       text: |
         :white_check_mark: Successfully deployed $BUILD_PIPELINE_NAME on ((prod-cf-api-url))
         <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+
+
+- name: run-sandbox-bot-prod-acceptance-tests
+  serial: true
+  serial_groups:
+  - sandbox-bot
+  plan:
+  - in_parallel:
+    - get: git-sandbox-bot
+      passed: [deploy-sandbox-bot-prod]
+      trigger: true
+  - task: sandbox-bot-prod-acceptance-tests
+    file: git-sandbox-bot/ci/acceptance-tests.yml
+    params:
+      CF_API: ((cf-api-production))
+      CF_ADMIN_USER: ((admin-user-production))
+      CF_ADMIN_PASSWORD: ((admin-password-production))
+  on_failure:
+    put: slack
+    params:
+      <<: *slack-failure-params
+      text: |
+        :x: FAILED to run staging acceptance tests $BUILD_PIPELINE_NAME on ((staging-cf-api-url))
+        <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+ 

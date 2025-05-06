@@ -15,4 +15,4 @@ inputs:
 
 
 run:
-  path: git-sandbox-bot/ci/staging-acceptance-tests.sh
+  path: git-sandbox-bot/ci/acceptance-tests.sh
