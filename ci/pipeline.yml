@@ -192,11 +192,13 @@ jobs:
   on_failure:
     put: slack
     params:
-      <<: *slack-failure-params
       text: |
-        :x: There are apps in at least one sandbox org in CF Staging, review $BUILD_PIPELINE_NAME on ((staging-cf-api-url)) for the application, organization and space names.
+        :x: There are apps in at least one sandbox org in CF Staging, review $BUILD_PIPELINE_NAME for the application, organization and space names.
         <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
- 
+      channel: "#cg-platform"
+      username: ((slack-username))
+      icon_url: ((slack-icon-url))
+
 
 - name: deploy-sandbox-bot-prod
   serial: true
