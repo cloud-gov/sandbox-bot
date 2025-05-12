@@ -4,7 +4,7 @@ resources:
   type: git
   source:
     uri: https://github.com/cloud-gov/cg-sandbox-bot
-    branch: main
+    branch: mouse-trap #main
     commit_verification_keys: ((cloud-gov-pgp-keys))
 
 - name: dotgov-domain-data
@@ -158,6 +158,29 @@ jobs:
         <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
  
 
+- name: stage-look-for-sandbox-apps
+  serial: true
+  serial_groups:
+  - sandbox-bot
+  plan:
+  - in_parallel:
+    - get: git-sandbox-bot
+      passed: [deploy-sandbox-bot-stage]
+      trigger: true
+  - task: sandbox-bot-stage-look-for-sandbox-apps
+    file: git-sandbox-bot/ci/check-for-sandbox-apps.yml
+    params:
+      CF_API: ((cf-api-staging))
+      CF_ADMIN_USER: ((admin-user-staging))
+      CF_ADMIN_PASSWORD: ((admin-password-staging))
+  on_failure:
+    put: slack
+    params:
+      <<: *slack-failure-params
+      text: |
+        :x: There are apps in at least one sandbox org in CF Staging, review $BUILD_PIPELINE_NAME on ((staging-cf-api-url)) for the application, organization and space names.
+        <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+ 
 
 - name: deploy-sandbox-bot-prod
   serial: true
