@@ -39,10 +39,10 @@ resources:
     skip_cert_check: false
 
 
-- name: hourly-timer
+- name: timer
   type: time
   source:
-    interval: 1h
+    interval: 4h
 
 resource_types:
 - name: registry-image
@@ -173,7 +173,7 @@ jobs:
     - get: git-sandbox-bot
       passed: [deploy-sandbox-bot-stage]
       trigger: true
-    - get: hourly-timer
+    - get: timer
       trigger: true
   - task: sandbox-bot-stage-look-for-sandbox-apps
     file: git-sandbox-bot/ci/check-for-sandbox-apps.yml
