@@ -4,7 +4,7 @@ resources:
   type: git
   source:
     uri: https://github.com/cloud-gov/cg-sandbox-bot
-    branch: mouse-trap #main
+    branch: main
     commit_verification_keys: ((cloud-gov-pgp-keys))
 
 - name: dotgov-domain-data
@@ -137,15 +137,7 @@ jobs:
       channel: ((slack-failure-channel))
       username: ((slack-user.username))
       icon_url: ((slack-icon-url))
-  on_success: &slack-success-params
-    put: slack
-    params:
-      text: |
-        :white_check_mark: Successfully deployed $BUILD_PIPELINE_NAME on ((staging-cf-api-url))
-        <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
-      channel: ((slack-success-channel))
-      username: ((slack-user.username))
-      icon_url: ((slack-icon-url))
+
 
 
 - name: run-sandbox-bot-stage-acceptance-tests
@@ -234,13 +226,6 @@ jobs:
       <<: *slack-failure-params
       text: |
         :x: FAILED to deploy $BUILD_PIPELINE_NAME on ((prod-cf-api-url))
-        <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
-  on_success:
-    put: slack
-    params:
-      <<: *slack-success-params
-      text: |
-        :white_check_mark: Successfully deployed $BUILD_PIPELINE_NAME on ((prod-cf-api-url))
         <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
 
 
