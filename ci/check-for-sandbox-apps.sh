@@ -3,7 +3,7 @@
 set -uo pipefail
 
 # Purpose
-# Check for the presence of any applications currently deployed to 
+# Check for the presence of any applications currently deployed to a sandbox org in CF.  If an app is found, the org, space and app name are printed and exits non-zero.
 
 # Log into CF as an admin
 echo "Logging into ${CF_API} as user ${CF_ADMIN_USER}..."
