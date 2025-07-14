@@ -1,5 +1,6 @@
 require 'csv'
 
+
 module MonitorHelper
 
   if ENV['DOMAIN_CSV_PATH']
@@ -27,21 +28,17 @@ module MonitorHelper
   # an email address. e.g. foo@subdomain.domain.org = domain
 
   def get_email_domain_name(email)
-    tlds = ['.gov', '.mil', '.fed.us']
-
-    domain = email.split('@')[1]
-
-    # remove any tlds
-    tlds.each{|t|
-      domain.slice! t
-    }
-
-    # return what we know about
-    domain.split('.')[-1]
+    domain = email.split('@')[1].downcase
+    domain.gsub(/\.(?:gov|mil|fed\.us)\z/, "").split('.')[-1]
   end
 
   def get_sandbox_space_name(email)
     return email.split('@')[0].downcase
+  end
+
+  def get_sandbox_org_name(email)
+    email_domain_name = get_email_domain_name(email)
+    "sandbox-#{email_domain_name}"
   end
 
   def get_cloud_environment(uaa_url)

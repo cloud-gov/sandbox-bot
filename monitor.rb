@@ -16,6 +16,17 @@ SANDBOX_QUOTA_NAME = 'sandbox_quota'
 @last_user_date = nil
 @environment = get_cloud_environment(ENV["UAA_URL"])
 
+def send_slack_notification(msg, sandbox_org_name)
+  puts msg
+  if (ENV["DO_SLACK"] === true || ENV["DO_SLACK"].downcase == "true")
+    begin
+      @notifier.ping msg, icon_emoji: ":cloud:"
+    rescue
+      puts "Could not post #{msg} to slack"
+    end
+  end
+end
+
 def process_new_users
 
   last_user_date = nil
@@ -37,8 +48,7 @@ def process_new_users
     next if !is_valid_email(email) || !is_allowlisted_email(email)
 
     # extract the domain name from the email address
-    email_domain_name = get_email_domain_name(email)
-    sandbox_org_name = "sandbox-#{email_domain_name}"
+    sandbox_org_name = get_sandbox_org_name(email)
 
     sandbox_org = @cf_client.get_organization_by_name(sandbox_org_name)
 
@@ -51,15 +61,8 @@ def process_new_users
       end
     	sandbox_org = @cf_client.create_organization(sandbox_org_name, org_quota["guid"])
 
-      msg = "Creating New Organization #{sandbox_org_name} on #{@environment}"
-      puts msg
-      if ENV["DO_SLACK"]
-        begin
-          @notifier.ping msg, icon_emoji: ":cloud:"
-        rescue
-          puts "Could not post #{msg} to slack"
-        end
-      end
+      send_slack_notification(msg, sandbox_org_name)
+
       is_new_org = true
     end
 
@@ -67,22 +70,14 @@ def process_new_users
     # if this is a new org or the user space doesn't exist in the org - create one
     if is_new_org ||
       !@cf_client.organization_space_name_exists?(sandbox_org['guid'], user_space_name)
-      msg = "Setting up new sandbox user #{user["username"]} in #{sandbox_org_name} on #{@environment}"
-      puts msg
 
-      # Send alert to slack
-      if ENV["DO_SLACK"]
-        begin
-          @notifier.ping msg, icon_emoji: ":cloud:"
-        rescue
-          puts "Could not post #{msg} to slack"
-        end
-      end
+      msg = "Setting up new sandbox user #{user["username"]} in #{sandbox_org_name} on #{@environment}"
+      send_slack_notification(msg, sandbox_org_name)
 
       # add user to the parent org
       @cf_client.add_user_to_org(user["guid"], sandbox_org["guid"])
 
-      #get the sandbox space quoto definition for this org - if one doesn't exist, create it
+      # get the sandbox space quota definition for this org - if one doesn't exist, create it
       sandbox_org_space_quota_definition =
         @cf_client.get_organization_space_quota_definition_by_name(sandbox_org['guid'], SANDBOX_QUOTA_NAME)
 

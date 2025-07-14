@@ -2,3 +2,4 @@
 credentials.yml
 .env
 .ruby-version
+.bundle

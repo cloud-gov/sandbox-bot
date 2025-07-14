@@ -53,7 +53,7 @@ resource_types:
     repository: registry-image-resource
     aws_region: us-gov-west-1
     tag: latest
-    
+
 - name: slack-notification
   type: registry-image
   source:
@@ -127,7 +127,7 @@ jobs:
         UAA_URL: ((uaa-url-staging))
         DOMAIN_CSV_PATH: ./current-federal.csv
         SLACK_HOOK: ((slack-webhook-url))
-        DO_SLACK: "false"
+        DO_SLACK: "true"
   on_failure: &slack-failure-params
     put: slack
     params:
@@ -162,7 +162,7 @@ jobs:
       text: |
         :x: FAILED to run staging acceptance tests $BUILD_PIPELINE_NAME on ((staging-cf-api-url))
         <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
- 
+
 
 - name: stage-look-for-sandbox-apps
   serial: true
@@ -251,4 +251,3 @@ jobs:
       text: |
         :x: FAILED to run staging acceptance tests $BUILD_PIPELINE_NAME on ((staging-cf-api-url))
         <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
- 
