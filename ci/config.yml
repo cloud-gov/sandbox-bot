@@ -3,3 +3,7 @@ cf-domain-name-production: fr.cloud.gov
 cf-domain-name-staging: fr-stage.cloud.gov
 cf-organization: cloud-gov
 cf-space: bots
+cf-api-staging: api.fr-stage.cloud.gov
+admin-user-staging: sandbox-bot-user
+cf-api-production: api.fr.cloud.gov
+admin-user-production: sandbox-bot-user
