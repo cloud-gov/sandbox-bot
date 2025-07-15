@@ -30,9 +30,9 @@ describe MonitorHelper do
 	end
 
 	it "should return the correct org from an email address" do
-		expect(monitor_helper_test.get_email_domain_name('foobar@DOMAIN.GOV')).to eq 'domain'
-		expect(monitor_helper_test.get_email_domain_name('foobar@DOMAIN.FED.US')).to eq 'domain'
-		expect(monitor_helper_test.get_email_domain_name('foobar@DOMAIN.MIL')).to eq 'domain'
+		expect(monitor_helper_test.get_email_domain_name('foobar@EXAMPLE.GOV')).to eq 'example'
+		expect(monitor_helper_test.get_email_domain_name('foobar@EXAMPLE.FED.US')).to eq 'example'
+		expect(monitor_helper_test.get_email_domain_name('foobar@EXAMPLE.MIL')).to eq 'example'
 	end
 
 	it "should return the correct sandbox org name" do
