@@ -29,6 +29,16 @@ describe MonitorHelper do
 
 	end
 
+	it "should return the correct org from an email address" do
+		expect(monitor_helper_test.get_email_domain_name('foobar@EXAMPLE.GOV')).to eq 'example'
+		expect(monitor_helper_test.get_email_domain_name('foobar@EXAMPLE.FED.US')).to eq 'example'
+		expect(monitor_helper_test.get_email_domain_name('foobar@EXAMPLE.MIL')).to eq 'example'
+	end
+
+	it "should return the correct sandbox org name" do
+		expect(monitor_helper_test.get_sandbox_org_name('foo@test.gov')).to eq 'sandbox-test'
+	end
+
 	it "should extract a valid sandbox space name from email" do
 
 		expect(monitor_helper_test.get_sandbox_space_name('john.doe@some.domain.gov')).to eq 'john.doe'
