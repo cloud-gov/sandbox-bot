@@ -3,6 +3,8 @@ GEM
   specs:
     addressable (2.9.0)
       public_suffix (>= 2.0.2, < 8.0)
+    auth-sanitizer (0.2.3)
+      version_gem (~> 1.1, >= 1.1.14)
     base64 (0.3.0)
     bigdecimal (3.2.2)
     crack (1.0.0)
@@ -15,33 +17,40 @@ GEM
       reline (>= 0.3.8)
     diff-lcs (1.6.2)
     erb (6.0.1.1)
-    faraday (2.14.2)
-      faraday-net_http (>= 2.0, < 3.5)
+    faraday (2.15.0)
+      faraday-net_http (>= 2.0, < 3.6)
       json
       logger
-    faraday-net_http (3.4.2)
+    faraday-net_http (3.5.0)
       net-http (~> 0.5)
     hashdiff (1.2.0)
+    hashie (5.1.0)
+      logger
     io-console (0.8.0)
     irb (1.15.2)
       pp (>= 0.6.0)
       rdoc (>= 4.0.0)
       reline (>= 0.4.2)
-    json (2.19.5)
-    jwt (2.10.2)
+    json (3.1.0)
+    jwt (3.3.0)
       base64
     logger (1.7.0)
-    multi_json (1.16.0)
-    multi_xml (0.7.2)
-      bigdecimal (~> 3.1)
-    net-http (0.9.1)
+    multi_xml (0.9.1)
+      bigdecimal (>= 3.1, < 5)
+    net-http (0.10.0)
+      net-protocol (>= 0.3.0)
       uri (>= 0.11.1)
-    oauth2 (1.4.11)
-      faraday (>= 0.17.3, < 3.0)
-      jwt (>= 1.0, < 3.0)
-      multi_json (~> 1.3)
+    net-protocol (0.4.0)
+      timeout
+    oauth2 (2.0.22)
+      auth-sanitizer (~> 0.2, >= 0.2.1)
+      faraday (>= 0.17.3, < 4.0)
+      jwt (>= 1.0, < 4.0)
+      logger (~> 1.2)
       multi_xml (~> 0.5)
       rack (>= 1.2, < 4)
+      snaky_hash (~> 2.0, >= 2.0.5)
+      version_gem (~> 1.1, >= 1.1.11)
     pp (0.6.2)
       prettyprint
     prettyprint (0.2.0)
@@ -49,7 +58,7 @@ GEM
       date
       stringio
     public_suffix (7.0.5)
-    rack (3.1.21)
+    rack (3.2.7)
     rdoc (6.14.2)
       erb
       psych (>= 4.0.0)
@@ -70,8 +79,13 @@ GEM
       rspec-support (~> 3.13.0)
     rspec-support (3.13.4)
     slack-notifier (2.4.0)
+    snaky_hash (2.0.7)
+      hashie (>= 0.1.0, < 6)
+      version_gem (~> 1.1, >= 1.1.14)
     stringio (3.1.7)
-    uri (1.1.1)
+    timeout (0.6.1)
+    uri (1.1.2)
+    version_gem (1.1.15)
     webmock (3.25.1)
       addressable (>= 2.8.0)
       crack (>= 0.3.2)
@@ -86,7 +100,7 @@ DEPENDENCIES
   bigdecimal
   csv
   debug
-  oauth2 (~> 1.4.0)
+  oauth2 (~> 2.0.22)
   rspec
   slack-notifier
   webmock
