@@ -5,7 +5,7 @@ ruby "~> 3.4.2"
 gem "base64"
 gem "bigdecimal"
 gem "csv"
-gem "oauth2", "~> 1.4.0"
+gem "oauth2", "~> 2.0.22"
 gem "slack-notifier"
 gem "rspec"
 group :test do
